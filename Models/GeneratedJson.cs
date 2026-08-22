@@ -221,18 +221,24 @@ public class Skin
     public string? BabyTexture { get; set; }
 }
 
-public class ExtraTextureChange : EditDataChange<ExtraTexture>
+public class ExtraAnimalConfigurationChange : EditDataChange<ExtraAnimalConfiguration>
 {
-    public ExtraTextureChange()
+    public ExtraAnimalConfigurationChange()
     {
         LogName = "Adding extra texture changes";
         Target = "selph.ExtraAnimalConfig/AnimalExtensionData";
     }
 }
 
-public class ExtraTexture : Entry
+public class ExtraAnimalConfiguration : Entry
 {
     public List<AppearanceData> TextureOverrides { get; set; } = [];
+    public bool? IgnoreRain { get; set; }
+    public bool? IgnoreWinter { get; set; }
+    public bool? IsHeater { get; set; }
+    public string? GlowColor { get; set; }
+    public float? GlowRadius { get; set; }
+    public List<ExtraProduceSpawnData> ExtraProduceSpawnList { get; set;} = [];
 }
 
 public class AppearanceData 
@@ -243,6 +249,14 @@ public class AppearanceData
     public string? Condition { get; set; }
     public string? TextureToUse { get; set; }
     public DefaultTexture? DefaultTextureToUse { get; set; }
+}
+
+public class ExtraProduceSpawnData
+{
+    public string Id { get; set; } = "";
+    public List<ProduceItem> ProduceItems { get; set; } = [];
+    public int DaysToProduce { get; set; }
+    public bool SyncWithMainProduce { get; set; }
 }
 
 public enum DefaultTexture
@@ -283,7 +297,7 @@ public class ObjectData : Entry
     // default false
     public bool? IsDrink { get; set; }
     // Not implemented yet
-    public string? Buffs { get; set; }
+    public List<Buff> Buffs { get; set; }
 
     // Geode & artifact spots
     // Not implemented yet
@@ -312,6 +326,19 @@ public class ObjectData : Entry
 public enum ObjectType
 {
     Basic, Arch, Litter, Minerals, Quest, Crafting, Fish, Cooking, Seeds, Ring, interactive, asdf
+}
+
+public class Buff {
+    public string Id { get; set; } = "";
+    public int Duration { get; set; }
+    public string? IconTexture { get; set; }
+    public string? IconSpriteIndex { get; set; }
+    public Effects? Effects { get; set; }
+}
+
+public class Effects
+{
+    public int? Attack { get; set; }
 }
 
 public class EggExtensionChange : EditDataChange<EggExtension>

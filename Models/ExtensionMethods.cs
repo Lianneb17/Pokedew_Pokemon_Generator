@@ -15,8 +15,9 @@ public static class ExtensionMethods
             ]
         };
 
-        if (config.Pokemon.Any(p => p.HasExtraTexture))
-            result.Changes.Add(config.BuildExtraTextureChanges());
+        var extraAnimalConfiguration = config.BuildExtraAnimalConfigurationChanges();
+        if (extraAnimalConfiguration.Entries.Count != 0)
+            result.Changes.Add(extraAnimalConfiguration);
 
         return result;
     }
@@ -135,6 +136,31 @@ public static class ExtensionMethods
                 }
             }
 
+            if (pokemon.Types.Contains(PokemonType.Electric)) {
+                var battery = new ProduceItem {
+                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_battery_{pokemon.Name}",
+                    ItemID = "787",
+                    Condition = "WEATHER Here Storm"
+                };
+                animal.DeluxeProduceItemIds.Add(battery);
+            }
+
+            if (pokemon.Types.Contains(PokemonType.Fairy)) {
+                var fairydust = new ProduceItem {
+                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_fairydust_{pokemon.Name}",
+                    ItemID = "872"
+                };
+                animal.DeluxeProduceItemIds.Add(fairydust);
+            }
+
+            if (pokemon.Types.Contains(PokemonType.Flying)) {
+                var duckfeather = new ProduceItem {
+                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_duckfeather_{pokemon.Name}",
+                    ItemID = "444"
+                };
+                animal.DeluxeProduceItemIds.Add(duckfeather);
+            }
+
             animalChange.Entries.Add(animal.ID, animal);
         }
 
@@ -153,16 +179,22 @@ public static class ExtensionMethods
         return result;
     }
 
-    public static ExtraTextureChange BuildExtraTextureChanges(this GeneratorConfig config)
+    public static ExtraAnimalConfigurationChange BuildExtraAnimalConfigurationChanges(this GeneratorConfig config)
     {
-        var result = new ExtraTextureChange();
+        var result = new ExtraAnimalConfigurationChange();
 
-        foreach(var pokemon in config.Pokemon.Where(p => p.HasExtraTexture))
+        foreach(var pokemon in config.Pokemon)
         {
-            var extraTexture = new ExtraTexture
+            var extraAnimalConfig = new ExtraAnimalConfiguration {
+                ID = $"{{{{modId}}}}_pokemon_{pokemon.Name}"
+            };
+
+            var hasExtras = false;
+
+            if (pokemon.HasExtraTexture)
             {
-                ID = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
-                TextureOverrides = [
+                hasExtras = true;
+                extraAnimalConfig.TextureOverrides = [
                     new AppearanceData {
                         Id = $"{{{{modId}}}}_pokemon_texture_{pokemon.Name}",
                         Condition = $"selph.ExtraAnimalConfig_ANIMAL_AGE {config.Levelspeed.TextureOverrides}",
@@ -173,10 +205,46 @@ public static class ExtensionMethods
                         Skin = $"{{{{modId}}}}_pokemon_{pokemon.Name}_shiny",
                         Condition = $"selph.ExtraAnimalConfig_ANIMAL_AGE {config.Levelspeed.TextureOverrides}",
                         TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureIndex}s"
-                    }]
-            };
+                    }];
+            }
 
-            result.Entries.Add(extraTexture.ID, extraTexture);
+            if (pokemon.Types.Contains(PokemonType.Water) 
+                || pokemon.Types.Contains(PokemonType.Grass)) {
+                hasExtras = true;
+                extraAnimalConfig.IgnoreRain = true;
+            }
+
+            if (pokemon.Types.Contains(PokemonType.Ice)){
+                hasExtras = true;
+                extraAnimalConfig.IgnoreWinter = true;
+            }
+
+            if (pokemon.Types.Contains(PokemonType.Fire)){
+                hasExtras = true;
+                extraAnimalConfig.IsHeater = true;
+            }
+
+            if (pokemon.Types.Contains(PokemonType.Ghost)){
+                hasExtras = true;
+                extraAnimalConfig.GlowColor = "SlateBlue";
+                extraAnimalConfig.GlowRadius = 30;
+            }
+
+            if (pokemon.Types.Contains(PokemonType.Ground)){
+                hasExtras = true;
+                extraAnimalConfig.ExtraProduceSpawnList.Add(new ExtraProduceSpawnData {
+                    Id = $"{{{{modId}}}}_pokemon_extraSpawn_truffle_{pokemon.Name}",
+                    ProduceItems = [new ProduceItem {
+                        Id = $"{{{{modId}}}}_pokemon_spawn_truffle_{pokemon.Name}",
+                        ItemID = "430"
+                    }],
+                    DaysToProduce = 1,
+                    SyncWithMainProduce = false
+                });
+            }
+
+            if (hasExtras)
+                result.Entries.Add(extraAnimalConfig.ID, extraAnimalConfig);
         }
 
         return result;
@@ -184,27 +252,39 @@ public static class ExtensionMethods
 
     public static ObjectChange BuildEggData(this GeneratorConfig config)
     {
+        var eggData = new ObjectData {
+            ID = $"{{{{modId}}}}_item_egg_{config.BasePokemon()}",
+            Name = "{{modId}}_item_egg_bulbasaur",
+            DisplayName = "{{i18n:egg.bulbasaur.item}}",
+            Description = "{{i18n:egg.bulbasaur.item.description}}",
+            Type = ObjectType.Basic,
+            Category = -5,
+            Price = config.HatchCycle.EggPrice,
+            Texture = "eggs/color",
+            SpriteIndex = config.Color.SpriteIndex,
+            Edibility = config.HatchCycle.Edibility,
+            ContextTags = ["egg_item", $"color_{config.Color.Color}"],
+            ExcludeFromShippingCollection = true
+        };
+
+        if (config.Pokemon[0].Types.Contains(PokemonType.Fighting))
+            eggData.Buffs.Add(new Buff{
+                Effects = new Effects {
+                    Attack = 3
+                }
+            });
+
+        if (config.Pokemon[0].Types.Contains(PokemonType.Poison))
+            eggData.Edibility = -100;
+
         return new ObjectChange
         {
             LogName = "Creating eggdata",
             Entries = new Dictionary<string, ObjectData>
             {
                 {
-                    $"{{{{modId}}}}_item_egg_{config.BasePokemon()}",
-                    new ObjectData{
-                    ID = $"{{{{modId}}}}_item_egg_{config.BasePokemon()}",
-                    Name = "",
-                    DisplayName = "",
-                    Description = "",
-                    Type = ObjectType.Basic,
-                    Category = -5,
-                    Price = config.HatchCycle.EggPrice,
-                    Texture = "eggs/color",
-                    SpriteIndex = config.Color.SpriteIndex,
-                    Edibility = config.HatchCycle.Edibility,
-                    ContextTags = ["egg_item", $"color_{config.Color.Color}"],
-                    ExcludeFromShippingCollection = true
-                    }
+                    eggData.ID,
+                    eggData
                 }
             }
         };
