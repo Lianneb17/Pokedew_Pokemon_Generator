@@ -1,3 +1,5 @@
+using PokemonJsonGenerator.Models;
+
 namespace PokemonJsonGenerator;
 
 public static class Questions
@@ -44,6 +46,8 @@ public static class Questions
             Name = AskString("Naam"),
             Gender = AskChoice("Gender", Enum.GetValues<Gender>(), x => x.ToString()),
             BarnType = AskChoice("Barn type", Enum.GetValues<BarnType>(), x => x.ToString()),
+            Types = AskMultipleChoice("Types", Enum.GetValues<PokemonType>(),
+                x => x.ToString().ToLowerInvariant(), 2),
             HasExtraTexture = AskYesNo("Heeft deze Pokémon een extra texture?")
         };
 
@@ -81,11 +85,14 @@ public static class Questions
     }
 
     private static List<T> AskMultipleChoice<T>(
-        string question, IReadOnlyList<T> options, Func<T, string> display)
+        string question, IReadOnlyList<T> options, Func<T, string> display, int? maximum = null)
     {
         while (true)
         {
-            Console.WriteLine(question + " (meerdere keuzes mogelijk, bijvoorbeeld 1,3,5):");
+            var suffix = maximum is int max
+                ? $" (kies maximaal {max}, bijvoorbeeld 1,3)"
+                : " (meerdere keuzes mogelijk, bijvoorbeeld 1,3,5)";
+            Console.WriteLine(question + suffix);
             for (var i = 0; i < options.Count; i++)
                 Console.WriteLine($"  {i + 1}. {display(options[i])}");
 
@@ -115,10 +122,13 @@ public static class Questions
                     indexes.Add(index);
             }
 
-            if (valid)
+            if (valid && (maximum is not int limit || indexes.Count <= limit))
                 return indexes.Select(i => options[i]).ToList();
 
-            Console.WriteLine("Ongeldige keuze.");
+            if (valid)
+                Console.WriteLine($"Kies maximaal {maximum} opties.");
+            else
+                Console.WriteLine("Ongeldige keuze.");
             Console.WriteLine();
         }
     }

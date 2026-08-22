@@ -6,15 +6,13 @@ internal static class Program
     {
         var config = Questions.AskGeneratorConfig();
 
-        const string modId = "{{modId}}";
-
         var outputPath = Path.Combine(
             Environment.CurrentDirectory,
             "modId_generated.json");
 
         try
         {
-            JsonGenerator.Write(config, modId, outputPath);
+            JsonGenerator.Write(config, outputPath);
 
             Console.WriteLine();
             Console.WriteLine("=== Klaar ===");

@@ -1,3 +1,5 @@
+using PokemonJsonGenerator.Models;
+
 namespace PokemonJsonGenerator;
 
 public static class Datasets

@@ -1,8 +1,14 @@
-namespace PokemonJsonGenerator;
+namespace PokemonJsonGenerator.Models;
 
 public enum Gender { Male, Female, MaleOrFemale }
 
 public enum BarnType { PokeBarn, BigPokeBarn, DeluxePokeBarn }
+
+public enum PokemonType
+{
+    Normal, Fighting, Flying, Poison, Ground, Rock, Bug, Ghost, Steel,
+    Fire, Water, Grass, Electric, Psychic, Ice, Dragon, Dark, Fairy
+}
 
 public enum EggGroup
 {
@@ -18,6 +24,8 @@ public sealed record HatchCycleData(
 public sealed record LevelspeedData(
     string Levelspeed, int DaysToMature, string TextureOverrides);
 
+public enum ChangeType { Load, EditData }
+
 public sealed record ColorData(string Color, int SpriteIndex);
 
 public sealed class PokemonConfig
@@ -25,6 +33,7 @@ public sealed class PokemonConfig
     public string Name { get; set; } = "";
     public Gender Gender { get; set; }
     public BarnType BarnType { get; set; }
+    public List<PokemonType> Types { get; set; } = [];
     public List<EggGroup> Groups { get; set; } = [];
     public bool HasExtraTexture { get; set; }
     public int? AlternativeTextureIndex { get; set; }
