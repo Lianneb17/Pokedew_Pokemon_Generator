@@ -1,4 +1,4 @@
-using PokemonJsonGenerator.Models;
+using PokemonJsonGenerator.Models.Pokemon;
 
 namespace PokemonJsonGenerator;
 

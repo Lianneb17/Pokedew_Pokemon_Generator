@@ -1,10 +1,13 @@
+using PokemonJsonGenerator.Models.Pokemon;
+using PokemonJsonGenerator.Models.Stardew;
+
 namespace PokemonJsonGenerator.Models;
 
 public static class ExtensionMethods
 {
-    public static GeneratedJson CreateJsonObject(this GeneratorConfig config)
+    public static DataJson CreateJsonObject(this GeneratorConfig config)
     {
-        var result = new GeneratedJson
+        var result = new DataJson
         {
             Changes = [
                 config.BuildLoadImages(),

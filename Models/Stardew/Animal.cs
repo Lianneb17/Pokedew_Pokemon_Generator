@@ -1,49 +1,6 @@
-namespace PokemonJsonGenerator.Models;
+using PokemonJsonGenerator.Models.Pokemon;
 
-public sealed class GeneratedJson
-{
-    public List<Change> Changes { get; set; } = [];
-}
-
-public abstract class Change
-{
-    public string LogName { get; set; } = "";
-    public abstract string Action { get; }
-    public string Target { get; set; } = "";
-
-}
-
-public sealed class LoadChange : Change
-{
-    public override string Action => "Load";
-    public string FromFile { get; set; } = "";
-}
-
-public class EditDataChange<T> : Change where T : Entry
-{
-    public override string Action => "EditData";
-    public Dictionary<string, T> Entries { get; set; } = [];
-}
-
-public abstract class Entry
-{
-    public string ID {get; set;} = "";
-}
-
-public sealed class Sound : Entry
-{    
-    public string Category { get; set; } = "Sound";
-    public List<string> FilePaths {get; set;} = [];
-}
-
-public sealed class SoundChange : EditDataChange<Sound>
-{
-    public SoundChange()
-    {
-        LogName = "Adding sound changes";
-        Target = "Data/AudioChanges";
-    }
-}
+namespace PokemonJsonGenerator.Models.Stardew;
 
 public sealed class AnimalChange : EditDataChange<Animal>
 {
@@ -187,8 +144,9 @@ public class Animal : Entry
     public string? BabyLeftRightPetHitboxTileSize { get; set; }
 }
 
-public class AlternatePurchaseType : Entry
+public class AlternatePurchaseType
 {
+    public string ID { get; set; } = "";
     public List<string> AnimalIDs { get; set; } = [];
     public string? Condition { get; set; }
 }
@@ -203,11 +161,6 @@ public class ProduceItem
     public int? MinimumFriendship { get; set; }
 }
 
-public enum HarvestType
-{
-    DropOvernight, HarvestWithTool, DigUp
-}
-
 public class Skin
 {
     public string ID { get; set; } = "";
@@ -219,145 +172,4 @@ public class Skin
     public string? HarvestedTexture { get; set; }
     // default main field
     public string? BabyTexture { get; set; }
-}
-
-public class ExtraAnimalConfigurationChange : EditDataChange<ExtraAnimalConfiguration>
-{
-    public ExtraAnimalConfigurationChange()
-    {
-        LogName = "Adding extra texture changes";
-        Target = "selph.ExtraAnimalConfig/AnimalExtensionData";
-    }
-}
-
-public class ExtraAnimalConfiguration : Entry
-{
-    public List<AppearanceData> TextureOverrides { get; set; } = [];
-    public bool? IgnoreRain { get; set; }
-    public bool? IgnoreWinter { get; set; }
-    public bool? IsHeater { get; set; }
-    public string? GlowColor { get; set; }
-    public float? GlowRadius { get; set; }
-    public List<ExtraProduceSpawnData> ExtraProduceSpawnList { get; set;} = [];
-}
-
-public class AppearanceData 
-{
-    public string Id { get; set; } = "";
-    public string? Produce { get; set; }
-    public string? Skin { get; set; }
-    public string? Condition { get; set; }
-    public string? TextureToUse { get; set; }
-    public DefaultTexture? DefaultTextureToUse { get; set; }
-}
-
-public class ExtraProduceSpawnData
-{
-    public string Id { get; set; } = "";
-    public List<ProduceItem> ProduceItems { get; set; } = [];
-    public int DaysToProduce { get; set; }
-    public bool SyncWithMainProduce { get; set; }
-}
-
-public enum DefaultTexture
-{
-    Texture, HarvestedTexture, BabyTexture
-}
-
-public class ObjectChange : EditDataChange<ObjectData>
-{
-    public ObjectChange()
-    {
-        LogName = "Adding object changes";
-        Target = "Data/ObjectChanges";
-    }
-}
-
-public class ObjectData : Entry
-{
-    // Basic info
-    public string Name { get; set; } = "";
-    public string DisplayName { get; set; } = "";
-    public string Description { get; set; } = "";
-    public ObjectType Type { get; set; }
-    public int Category { get; set; }
-    // Default 0
-    public int? Price { get; set; }
-
-    // Appearance
-    // Default Maps/springobjects
-    public string? Texture { get; set; }
-    public int SpriteIndex { get; set; }
-    // Default false
-    public bool? ColorOverlayFromNextIndex { get; set; }
-
-    // Edibility
-    // Default -300
-    public int? Edibility { get; set; }
-    // default false
-    public bool? IsDrink { get; set; }
-    // Not implemented yet
-    public List<Buff> Buffs { get; set; }
-
-    // Geode & artifact spots
-    // Not implemented yet
-    public string? GeodeDrops { get; set; }
-    // Not implemented yet
-    public string? GeodeDropsDefaultItems { get; set; }
-    public double? ArtifactSpotChances { get; set; }
-
-    // Context tags & exclusions
-    public List<string> ContextTags { get; set; } = [];
-    // default true
-    public bool? CanBeGivenAsGift { get; set; }
-    // default true
-    public bool? CanBeTrashed { get; set; }
-    // default false
-    public bool? ExcludeFromRandomSale { get; set; }
-    // default false
-    public bool? ExcludeFromFishingCollection { get; set; }
-    // default false
-    public bool? ExcludeFromShippingCollection { get; set; }
-
-    // Advanced
-    public string? CustomFields { get; set; }
-}
-
-public enum ObjectType
-{
-    Basic, Arch, Litter, Minerals, Quest, Crafting, Fish, Cooking, Seeds, Ring, interactive, asdf
-}
-
-public class Buff {
-    public string Id { get; set; } = "";
-    public int Duration { get; set; }
-    public string? IconTexture { get; set; }
-    public string? IconSpriteIndex { get; set; }
-    public Effects? Effects { get; set; }
-}
-
-public class Effects
-{
-    public int? Attack { get; set; }
-}
-
-public class EggExtensionChange : EditDataChange<EggExtension>
-{
-    public EggExtensionChange()
-    {
-        LogName = "Adding egg extension changes";
-        Target = "selph.ExtraAnimalConfig/EggExtensionData";
-    }
-}
-
-public class EggExtension : Entry
-{
-    public List<AnimalSpawnData> AnimalSpawnList { get; set; } = [];
-}
-
-public class AnimalSpawnData
-{
-    public string Id { get; set; } = "";
-    public string AnimalId { get; set; } = "";
-    public string? Condition { get; set; }
 }
