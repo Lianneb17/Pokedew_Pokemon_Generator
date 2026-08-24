@@ -4,26 +4,7 @@ using PokemonJsonGenerator.Models.Stardew;
 namespace PokemonJsonGenerator.Models;
 
 public static class ExtensionMethods
-{
-    public static DataJson CreateJsonObject(this Group config)
-    {
-        var result = new DataJson
-        {
-            Changes = [
-                config.BuildLoadImages(),
-                config.BuildSoundChanges(),
-                config.BuildAnimalChanges(),
-                config.BuildEggData(),
-                config.BuildEggExtensionData()
-            ]
-        };
-
-        var extraAnimalConfiguration = config.BuildExtraAnimalConfigurationChanges();
-        if (extraAnimalConfiguration.Entries.Count != 0)
-            result.Changes.Add(extraAnimalConfiguration);
-
-        return result;
-    }
+{    
     public static string BasePokemon(this Group config)
     {
         if (config.Pokemon.Count == 0)

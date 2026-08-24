@@ -4,20 +4,22 @@ using System.Text.Json.Serialization;
 using System.Collections;
 using System.Globalization;
 using PokemonJsonGenerator.Models;
+using PokemonJsonGenerator.Models.Stardew;
+using PokemonJsonGenerator.Models.Pokemon;
 
 namespace PokemonJsonGenerator;
 
 public static class JsonGenerator
 {
-    public static GeneratedJson Generate(GeneratorConfig config)
+    public static DataJson Generate(Group config)
     {
         if (config.Pokemon.Count == 0)
             throw new InvalidOperationException("At least one Pokémon is required.");
 
-        return config.CreateJsonObject();
+        return config.CreateStardewPokemon();
     }
 
-    public static void Write(GeneratorConfig config, string filePath)
+    public static void Write(Group config, string filePath)
     {
         var root = Generate(config);
 

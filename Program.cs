@@ -1,23 +1,27 @@
+using PokemonJsonGenerator.Models;
+using PokemonJsonGenerator.Utils;
+
 namespace PokemonJsonGenerator;
 
 internal static class Program
 {
     public static void Main()
     {
-        var config = Questions.AskGeneratorConfig();
+        var input = Questions.AskGeneratorConfig();
 
-        var outputPath = Path.Combine(
+        var pokemonPath = Path.Combine(
             Environment.CurrentDirectory,
-            "modId_generated.json");
+            "Result",
+            $"{input.BasePokemon().FirstCharToUpperCase()}Data.json");
 
         try
         {
-            JsonGenerator.Write(config, outputPath);
+            JsonGenerator.Write(input, pokemonPath);
 
             Console.WriteLine();
             Console.WriteLine("=== Klaar ===");
             Console.WriteLine($"JSON geschreven naar:");
-            Console.WriteLine(outputPath);
+            Console.WriteLine(pokemonPath);
         }
         catch (Exception ex)
         {
