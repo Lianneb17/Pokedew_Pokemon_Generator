@@ -5,7 +5,7 @@ namespace PokemonJsonGenerator.Models;
 
 public static class ExtensionMethods
 {
-    public static DataJson CreateJsonObject(this GeneratorConfig config)
+    public static DataJson CreateJsonObject(this Group config)
     {
         var result = new DataJson
         {
@@ -24,7 +24,7 @@ public static class ExtensionMethods
 
         return result;
     }
-    public static string BasePokemon(this GeneratorConfig config)
+    public static string BasePokemon(this Group config)
     {
         if (config.Pokemon.Count == 0)
             throw new InvalidOperationException("Er is geen Pokémon toegevoegd.");
@@ -32,7 +32,7 @@ public static class ExtensionMethods
         return config.Pokemon[0].Name;
     }
 
-    public static LoadChange BuildLoadImages(this GeneratorConfig config)
+    public static LoadChange BuildLoadImages(this Group config)
     {
         var targets = $"{config.BasePokemon()}/shopicon";
 
@@ -51,7 +51,7 @@ public static class ExtensionMethods
         };
     }
 
-    public static SoundChange BuildSoundChanges(this GeneratorConfig config)
+    public static SoundChange BuildSoundChanges(this Group config)
     {
         var soundChange = new SoundChange();
 
@@ -69,7 +69,7 @@ public static class ExtensionMethods
         return soundChange;
     }
 
-    public static AnimalChange BuildAnimalChanges(this GeneratorConfig config)
+    public static AnimalChange BuildAnimalChanges(this Group config)
     {
         var animalChange = new AnimalChange();
 
@@ -170,7 +170,7 @@ public static class ExtensionMethods
         return animalChange;
     }
 
-    public static List<string> GetEggItemIds(this GeneratorConfig config)
+    public static List<string> GetEggItemIds(this Group config)
     {
         List<string> result = [$"{{{{modId}}}}_item_egg_{config.BasePokemon()}"];
 
@@ -182,7 +182,7 @@ public static class ExtensionMethods
         return result;
     }
 
-    public static ExtraAnimalConfigurationChange BuildExtraAnimalConfigurationChanges(this GeneratorConfig config)
+    public static ExtraAnimalConfigurationChange BuildExtraAnimalConfigurationChanges(this Group config)
     {
         var result = new ExtraAnimalConfigurationChange();
 
@@ -253,7 +253,7 @@ public static class ExtensionMethods
         return result;
     }
 
-    public static ObjectChange BuildEggData(this GeneratorConfig config)
+    public static ObjectChange BuildEggData(this Group config)
     {
         var eggData = new ObjectData {
             ID = $"{{{{modId}}}}_item_egg_{config.BasePokemon()}",
@@ -293,7 +293,7 @@ public static class ExtensionMethods
         };
     }
 
-    public static EggExtensionChange BuildEggExtensionData(this GeneratorConfig config)
+    public static EggExtensionChange BuildEggExtensionData(this Group config)
     {
         var spawnList = new List<AnimalSpawnData>();
 

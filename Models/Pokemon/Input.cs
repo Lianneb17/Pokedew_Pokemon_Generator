@@ -1,6 +1,6 @@
 namespace PokemonJsonGenerator.Models.Pokemon;
 
-public sealed class PokemonConfig
+public sealed class Pokemon
 {
     public string Name { get; set; } = "";
     public Gender Gender { get; set; }
@@ -11,7 +11,7 @@ public sealed class PokemonConfig
     public int? AlternativeTextureIndex { get; set; }
 }
 
-public sealed class GeneratorConfig
+public sealed class Group
 {
     public HatchCycleData HatchCycle { get; set; } = null!;
     public LevelspeedData Levelspeed { get; set; } = null!;
@@ -19,5 +19,5 @@ public sealed class GeneratorConfig
     public List<EggGroup> Groups { get; set; } = [];
     public int SpriteWidth { get; set; }
     public int SpriteHeight { get; set; }
-    public List<PokemonConfig> Pokemon { get; set; } = [];
+    public List<Pokemon> Pokemon { get; set; } = [];
 }
