@@ -11,21 +11,59 @@ namespace PokemonJsonGenerator;
 
 public static class JsonGenerator
 {
-    public static DataJson Generate(Group config)
+    public static DataJson Read(string filePath)
+    {
+        var json = File.ReadAllText(filePath);
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            Converters =
+            {
+                new ChangeJsonConverter(),
+                new BooleanAsStringConverter(),
+                new NumberAsStringConverterFactory(),
+                new JsonStringEnumConverter()
+            }
+        };
+
+        return JsonSerializer.Deserialize<DataJson>(json, options)
+            ?? throw new InvalidOperationException($"Unable to deserialize JSON from '{filePath}'.");
+    }
+
+    public static DataJson GenerateStardewPokemon(Group config)
     {
         if (config.Pokemon.Count == 0)
             throw new InvalidOperationException("At least one Pokémon is required.");
 
-        return config.CreateStardewPokemon();
+        var result = new DataJson
+        {
+            Changes = [
+                config.BuildLoadImages(),
+                config.BuildSoundChanges(),
+                config.BuildAnimalChanges(),
+                config.BuildEggData(),
+                config.BuildEggExtensionData()
+            ]
+        };
+
+        var extraAnimalConfiguration = config.BuildExtraAnimalConfigurationChanges();
+        if (extraAnimalConfiguration.Entries.Count != 0)
+            result.Changes.Add(extraAnimalConfiguration);
+
+        return result;
     }
 
     public static void Write(Group config, string filePath)
     {
-        var root = Generate(config);
+        Write(GenerateStardewPokemon(config), filePath);
+    }
 
+    public static void Write(DataJson root, string filePath)
+    {
         var options = new JsonSerializerOptions
         {
-
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -36,13 +74,10 @@ public static class JsonGenerator
                 new NumberAsStringConverterFactory(),
                 new JsonStringEnumConverter()
             },
-            // Ensure a TypeInfoResolver is set before the options becomes read-only.
-            // This avoids "JsonSerializerOptions instance must specify a TypeInfoResolver setting before being marked as read-only."
             TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver
             {
                 Modifiers = { IgnoreEmptyValues }
             }
-
         };
 
         File.WriteAllText(filePath, JsonSerializer.Serialize(root, options));
@@ -68,7 +103,35 @@ public static class JsonGenerator
 
         public override Change Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotSupportedException("Changes are only serialized.");
+            using var document = JsonDocument.ParseValue(ref reader);
+            var element = document.RootElement;
+
+            var target = element.TryGetProperty("Target", out var targetElement)
+                ? targetElement.GetString()
+                : null;
+
+            var normalizedTarget = target?.Replace('\\', '/');
+
+            if (string.Equals(normalizedTarget, "Data/AudioChanges", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<SoundChange>(element.GetRawText(), options)!;
+
+            if (string.Equals(normalizedTarget, "Data/AnimalChanges", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<AnimalChange>(element.GetRawText(), options)!;
+
+            if (string.Equals(normalizedTarget, "Data/ObjectChanges", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(normalizedTarget, "data/objects", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<ObjectChange>(element.GetRawText(), options)!;
+
+            if (string.Equals(normalizedTarget, "selph.ExtraAnimalConfig/AnimalExtensionData", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<ExtraAnimalConfigurationChange>(element.GetRawText(), options)!;
+
+            if (string.Equals(normalizedTarget, "selph.ExtraAnimalConfig/EggExtensionData", StringComparison.OrdinalIgnoreCase))
+                return JsonSerializer.Deserialize<EggExtensionChange>(element.GetRawText(), options)!;
+
+            if (element.TryGetProperty("FromFile", out _))
+                return JsonSerializer.Deserialize<LoadChange>(element.GetRawText(), options)!;
+
+            throw new NotSupportedException($"Unsupported change target '{target ?? "unknown"}'.");
         }
     }
 
@@ -81,7 +144,24 @@ public static class JsonGenerator
 
         public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotSupportedException("Boolean values are only serialized.");
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var value = reader.GetString();
+                if (bool.TryParse(value, out var parsed))
+                    return parsed;
+
+                if (string.Equals(value, "True", StringComparison.OrdinalIgnoreCase))
+                    return true;
+                if (string.Equals(value, "False", StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+
+            if (reader.TokenType == JsonTokenType.True)
+                return true;
+            if (reader.TokenType == JsonTokenType.False)
+                return false;
+
+            throw new JsonException($"Unable to read boolean value from token '{reader.TokenType}'.");
         }
     }
 
@@ -120,7 +200,28 @@ public static class JsonGenerator
 
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            throw new NotSupportedException("Numeric values are only serialized.");
+            object? value;
+            var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var stringValue = reader.GetString();
+                if (string.IsNullOrWhiteSpace(stringValue))
+                    return default!;
+
+                value = Convert.ChangeType(stringValue, targetType, CultureInfo.InvariantCulture);
+            }
+            else if (reader.TokenType == JsonTokenType.Number)
+            {
+                value = reader.GetDecimal();
+                value = Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                throw new JsonException($"Unable to read numeric value from token '{reader.TokenType}'.");
+            }
+
+            return (T)value!;
         }
     }
 }

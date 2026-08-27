@@ -33,7 +33,7 @@ public class ObjectData : Entry
     // default false
     public bool? IsDrink { get; set; }
     // Not implemented yet
-    public List<Buff> Buffs { get; set; }
+    public List<Buff> Buffs { get; set; } = [];
 
     // Geode & artifact spots
     // Not implemented yet

@@ -15,12 +15,13 @@ public static class ExtensionMethods
 
     public static LoadChange BuildLoadImages(this Group config)
     {
-        var targets = $"{config.BasePokemon()}/shopicon";
+        var targets = "";
+        if (config.ShouldBeForSale)
+            targets = $"{config.BasePokemon()}/shopicon";
 
         foreach (var pokemon in config.Pokemon)
-        {
-            targets += $", {config.BasePokemon()}/{pokemon.Name}, {config.BasePokemon()}/{pokemon.Name}s";
-        }
+            targets += (string.IsNullOrEmpty(targets) ? "" : ", ")
+                + $"{config.BasePokemon()}/{pokemon.Name}, {config.BasePokemon()}/{pokemon.Name}s";
 
         var fromFile = $"assets/{config.BasePokemon()}/{{{{TargetWithoutPath}}}}.png";
 
@@ -94,7 +95,7 @@ public static class ExtensionMethods
                 SellPrice = config.HatchCycle.SellPrice
             };
 
-            if (pokemon == config.Pokemon[0])
+            if (pokemon == config.Pokemon[0] && config.ShouldBeForSale)
             {
                 animal.PurchasePrice = config.HatchCycle.PurchasePrice;
                 animal.ShopTexture = $"{config.BasePokemon()}/shopicon";
@@ -155,7 +156,7 @@ public static class ExtensionMethods
     {
         List<string> result = [$"{{{{modId}}}}_item_egg_{config.BasePokemon()}"];
 
-        foreach(var group in config.Groups)
+        foreach(var group in config.EggGroups)
         {
             result.Add($"{{{{modId}}}}_item_egg_group_{group.ToString().ToLowerInvariant()}");
         }
@@ -238,9 +239,9 @@ public static class ExtensionMethods
     {
         var eggData = new ObjectData {
             ID = $"{{{{modId}}}}_item_egg_{config.BasePokemon()}",
-            Name = "{{modId}}_item_egg_bulbasaur",
-            DisplayName = "{{i18n:egg.bulbasaur.item}}",
-            Description = "{{i18n:egg.bulbasaur.item.description}}",
+            Name = $"{{{{modId}}_item_egg_{config.BasePokemon()}",
+            DisplayName = $"{{{{i18n:egg.{config.BasePokemon()}.item}}}}",
+            Description = $"{{{{i18n:egg.{config.BasePokemon()}.item.description}}}}",
             Type = ObjectType.Basic,
             Category = -5,
             Price = config.HatchCycle.EggPrice,
@@ -306,5 +307,56 @@ public static class ExtensionMethods
                 }
             }
         };
+    }
+
+    public static DataJson UpdateEggs(this Group input, DataJson eggData)
+    {
+        var eggExtensionChanges = eggData.Changes
+            .OfType<EggExtensionChange>()
+            .SelectMany(change => change.Entries)
+            .ToDictionary(entry => entry.Key, entry => entry.Value);
+
+        foreach (var eggGroup in input.EggGroups)
+        {
+            var entryId = $"{{{{modId}}}}_item_egg_group_{eggGroup.ToString().ToLowerInvariant()}";
+            if (!eggExtensionChanges.TryGetValue(entryId, out var eggExtension))
+                continue;
+
+            var currentListCount = eggExtension.AnimalSpawnList.Count;
+            if (currentListCount == 0)
+                continue;
+
+            foreach (var pokemon in input.Pokemon)
+            {
+                var spawnChance = (1d / eggExtension.AnimalSpawnList.Count).ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+
+                eggExtension.AnimalSpawnList.Insert(0, new AnimalSpawnData
+                {
+                    Id = $"{{{{modId}}}}_spawn_egg_{eggGroup.ToString().ToLowerInvariant()}_{pokemon.Name}",
+                    AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
+                    Condition = $"PLAYER_BASE_FARMING_LEVEL current {pokemon.CatchRate.FarmLevel}, RANDOM {spawnChance}"
+                });
+            }
+        }
+
+        var entryIdAll = "{{modId}}_item_egg_all";
+        if (!input.EggGroups.Contains(EggGroup.NoEggDiscovered) 
+            && eggExtensionChanges.TryGetValue(entryIdAll, out var eggExtensionAll)) 
+        {
+            foreach (var pokemon in input.Pokemon)
+            {
+                var spawnChance = (1d / eggExtensionAll.AnimalSpawnList.Count).ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
+
+                eggExtensionAll.AnimalSpawnList.Insert(0, new AnimalSpawnData
+                {
+                    Id = $"{{{{modId}}}}_spawn_egg_all_{pokemon.Name}",
+                    AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
+                    Condition = $"PLAYER_BASE_FARMING_LEVEL current {pokemon.CatchRate.FarmLevel}, RANDOM {spawnChance}"
+                });
+            }
+                      
+        }
+
+        return eggData;
     }
 }

@@ -1,53 +1,35 @@
 using PokemonJsonGenerator.Models;
+using PokemonJsonGenerator.Models.Pokemon;
 
 namespace PokemonJsonGenerator;
 
 public static class Questions
 {
-    public static GeneratorConfig AskGeneratorConfig()
+    public static async Task<Group> AskGeneratorConfig()
     {
         Console.WriteLine("=== Pokémon JSON Generator ===");
         Console.WriteLine();
 
-        var config = new GeneratorConfig
-        {
-            HatchCycle = AskChoice("HatchCycle", Datasets.HatchCycles,
-                x => $"{x.HatchCycle} dagen | Purchase {x.PurchasePrice} | Sell {x.SellPrice} | Incubation {x.IncubationTime} | Produce {x.DaysToProduce}"),
+        Console.WriteLine("=== Pokémon API ===");
+        var pokemonName = AskString("Basis-Pokémon");
+        var config = await new PokeApiClient().BuildGroupAsync(pokemonName);
+        config.ShouldBeForSale = AskYesNo("Moet deze Pokémon te koop zijn?");
 
-            Levelspeed = AskChoice("Levelspeed", Datasets.Levelspeeds,
-                x => $"{x.Levelspeed} | DaysToMature {x.DaysToMature} | Textures {x.TextureOverrides}"),
-
-            Color = AskChoice("Color", Datasets.Colors,
-                x => $"{x.Color} | SpriteIndex {x.SpriteIndex}"),
-
-            Groups = AskMultipleChoice("Groups", Datasets.EggGroups, x => x.ToString()),
-
-            SpriteWidth = AskPositiveInt("Sprite width"),
-            SpriteHeight = AskPositiveInt("Sprite height")
-        };
-
-        Console.WriteLine();
-        Console.WriteLine("=== Pokémon ===");
-
-        do
-        {
-            config.Pokemon.Add(AskPokemon(config.Pokemon));
-            Console.WriteLine();
-        }
-        while (AskYesNo("Nog een Pokémon toevoegen?"));
+        Console.WriteLine($"{config.Pokemon.Count} Pokémon-entries opgehaald uit PokeAPI.");
 
         return config;
     }
 
-    private static PokemonConfig AskPokemon(IReadOnlyList<PokemonConfig> existingPokemon)
+    private static Pokemon AskPokemon(IReadOnlyList<Pokemon> existingPokemon)
     {
-        var pokemon = new PokemonConfig
+        var pokemon = new Pokemon
         {
             Name = AskString("Naam"),
             Gender = AskChoice("Gender", Enum.GetValues<Gender>(), x => x.ToString()),
             BarnType = AskChoice("Barn type", Enum.GetValues<BarnType>(), x => x.ToString()),
             Types = AskMultipleChoice("Types", Enum.GetValues<PokemonType>(),
                 x => x.ToString().ToLowerInvariant(), 2),
+            CatchRate = AskChoice("CatchRate", Datasets.CatchRates, x => $"{x.CatchRate} | FarmLevel {x.FarmLevel}"),
             HasExtraTexture = AskYesNo("Heeft deze Pokémon een extra texture?")
         };
 
