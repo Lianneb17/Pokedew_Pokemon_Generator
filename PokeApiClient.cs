@@ -37,12 +37,8 @@ public sealed class PokeApiClient
 
         AddEvolutionEntries(evolutionChain.Chain, 1, entries);
 
-        var secondStageIndex = entries
-            .Where(entry => entry.Stage == 2)
-            .Select(entry => entries.IndexOf(entry))
-            .FirstOrDefault(-1);
-
         var result = new List<Pokemon>();
+        string? secondStageTextureName = null;
         foreach (var entry in entries)
         {
             var speciesData = await GetAsync<PokemonSpeciesResponse>(entry.SpeciesUrl);
@@ -60,6 +56,9 @@ public sealed class PokeApiClient
                     if (genders.Count > 1)
                         entryName += $"_{gender.ToString().ToLowerInvariant()}";
 
+                    if (entry.Stage == 2 && secondStageTextureName is null)
+                        secondStageTextureName = entryName;
+
                     result.Add(new Pokemon
                     {
                         Name = entryName,
@@ -71,7 +70,7 @@ public sealed class PokeApiClient
                             .ToList(),
                         CatchRate = ToCatchRate(speciesData.CaptureRate),
                         HasExtraTexture = entry.Stage >= 3,
-                        AlternativeTextureIndex = entry.Stage >= 3 ? secondStageIndex : null
+                        AlternativeTextureName = entry.Stage >= 3 ? secondStageTextureName : null
                     });
                 }
             }
@@ -124,10 +123,12 @@ public sealed class PokeApiClient
             "bug" => EggGroup.Bug,
             "flying" => EggGroup.Flying,
             "field" => EggGroup.Field,
+            "ground" => EggGroup.Field,
             "fairy" => EggGroup.Fairy,
             "plant" => EggGroup.Grass,
             "grass" => EggGroup.Grass,
             "humanlike" => EggGroup.HumanLike,
+            "humanshape" => EggGroup.HumanLike,
             "water3" => EggGroup.Water3,
             "mineral" => EggGroup.Mineral,
             "amorphous" => EggGroup.Amorphous,
@@ -136,6 +137,7 @@ public sealed class PokeApiClient
             "dragon" => EggGroup.Dragon,
             "noeggs" or "undiscovered" => EggGroup.NoEggDiscovered,
             "genderunknown" => EggGroup.GenderUnknown,
+            "indeterminate" => EggGroup.Amorphous,
             _ => throw new InvalidOperationException($"Onbekende Egg Group '{name}'.")
         };
     }

@@ -39,10 +39,10 @@ public static class Questions
                 throw new InvalidOperationException(
                     "Een alternative texture kan niet worden gekozen voordat er een eerdere Pokémon bestaat.");
 
-            pokemon.AlternativeTextureIndex = AskChoice(
+            pokemon.AlternativeTextureName = AskChoice(
                 "Alternative texture",
                 Enumerable.Range(0, existingPokemon.Count).ToArray(),
-                index => $"{index}: {existingPokemon[index].Name}");
+                index => existingPokemon[index].Name).ToString();
         }
 
         return pokemon;

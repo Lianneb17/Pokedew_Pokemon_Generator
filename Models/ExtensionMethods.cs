@@ -104,18 +104,29 @@ public static class ExtensionMethods
                 animal.ShopMissingBuildingDescription = "{{i18n:pokemon.all.shop.missing}}";
                 animal.ShowInSummitCredits = true;
 
-                for (var i = config.Pokemon.Count - 1; i >= 0; i--)
+                var purchaseGroups = config.Pokemon
+                    .Select((purchasePokemon, index) => new { purchasePokemon, index })
+                    .GroupBy(item => item.purchasePokemon.BarnType)
+                    .OrderByDescending(group => group.Max(item => item.index));
+
+                foreach (var purchaseGroup in purchaseGroups)
                 {
                     var alternatePurchaseType = new AlternatePurchaseType
                     {
-                        ID = $"{{{{modId}}}}_pokemon_purchase_{config.Pokemon[i].Name}",
-                        AnimalIDs = [$"{{{{modId}}}}_pokemon_{config.Pokemon[i].Name}"]
+                        ID = $"{{{{modId}}}}_pokemon_purchase_{config.BasePokemon()}_{purchaseGroup.Key}",
+                        AnimalIDs = purchaseGroup
+                            .Select(item => $"{{{{modId}}}}_pokemon_{item.purchasePokemon.Name}")
+                            .ToList()
                     };
 
-                    var chance = 1.0 / (i + 1);
-                    var purchasePokemon = config.Pokemon[i];
-                    if (chance < 1 && purchasePokemon.BarnType != BarnType.PokeBarn)
-                        alternatePurchaseType.Condition += $"BUILDINGS_CONSTRUCTED All \"{purchasePokemon.BarnType}\", RANDOM {chance:F3}";
+                    var chance = purchaseGroup.Key switch
+                    {
+                        BarnType.PokeBarn => 1.0,
+                        BarnType.BigPokeBarn => 0.5,
+                        _ => 1.0 / 3
+                    };
+                    if (chance < 1 && purchaseGroup.Key != BarnType.PokeBarn)
+                        alternatePurchaseType.Condition += $"BUILDINGS_CONSTRUCTED All \"{purchaseGroup.Key}\", RANDOM {chance:F3}";
 
                     animal.AlternatePurchaseTypes.Add(alternatePurchaseType);
                 }
@@ -183,13 +194,13 @@ public static class ExtensionMethods
                     new AppearanceData {
                         Id = $"{{{{modId}}}}_pokemon_texture_{pokemon.Name}",
                         Condition = $"selph.ExtraAnimalConfig_ANIMAL_AGE {config.Levelspeed.TextureOverrides}",
-                        TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureIndex}"
+                        TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureName}"
                     },
                     new AppearanceData {
                         Id = $"{{{{modId}}}}_pokemon_texture_{pokemon.Name}_shiny",
                         Skin = $"{{{{modId}}}}_pokemon_{pokemon.Name}_shiny",
                         Condition = $"selph.ExtraAnimalConfig_ANIMAL_AGE {config.Levelspeed.TextureOverrides}",
-                        TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureIndex}s"
+                        TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureName}s"
                     }];
             }
 

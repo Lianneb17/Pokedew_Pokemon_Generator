@@ -8,7 +8,7 @@ public sealed class Pokemon
     public List<PokemonType> Types { get; set; } = [];
     public CatchRateData CatchRate { get; set;} = null!;
     public bool HasExtraTexture { get; set; }
-    public int? AlternativeTextureIndex { get; set; }
+    public string? AlternativeTextureName { get; set; }
 }
 
 public sealed class Group
