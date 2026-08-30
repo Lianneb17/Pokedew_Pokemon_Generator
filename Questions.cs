@@ -12,40 +12,13 @@ public static class Questions
 
         Console.WriteLine("=== Pokémon API ===");
         var pokemonName = AskString("Basis-Pokémon");
+        var shouldBeForSale = AskYesNo("Moet deze Pokémon te koop zijn?");
         var config = await new PokeApiClient().BuildGroupAsync(pokemonName);
-        config.ShouldBeForSale = AskYesNo("Moet deze Pokémon te koop zijn?");
+        config.ShouldBeForSale = shouldBeForSale;
 
         Console.WriteLine($"{config.Pokemon.Count} Pokémon-entries opgehaald uit PokeAPI.");
 
         return config;
-    }
-
-    private static Pokemon AskPokemon(IReadOnlyList<Pokemon> existingPokemon)
-    {
-        var pokemon = new Pokemon
-        {
-            Name = AskString("Naam"),
-            Gender = AskChoice("Gender", Enum.GetValues<Gender>(), x => x.ToString()),
-            BarnType = AskChoice("Barn type", Enum.GetValues<BarnType>(), x => x.ToString()),
-            Types = AskMultipleChoice("Types", Enum.GetValues<PokemonType>(),
-                x => x.ToString().ToLowerInvariant(), 2),
-            CatchRate = AskChoice("CatchRate", Datasets.CatchRates, x => $"{x.CatchRate} | FarmLevel {x.FarmLevel}"),
-            HasExtraTexture = AskYesNo("Heeft deze Pokémon een extra texture?")
-        };
-
-        if (pokemon.HasExtraTexture)
-        {
-            if (existingPokemon.Count == 0)
-                throw new InvalidOperationException(
-                    "Een alternative texture kan niet worden gekozen voordat er een eerdere Pokémon bestaat.");
-
-            pokemon.AlternativeTextureName = AskChoice(
-                "Alternative texture",
-                Enumerable.Range(0, existingPokemon.Count).ToArray(),
-                index => existingPokemon[index].Name).ToString();
-        }
-
-        return pokemon;
     }
 
     private static T AskChoice<T>(string question, IReadOnlyList<T> options, Func<T, string> display)

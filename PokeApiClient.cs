@@ -68,7 +68,7 @@ public sealed class PokeApiClient
                             .OrderBy(type => type.Slot)
                             .Select(type => Enum.Parse<PokemonType>(type.Type.Name, true))
                             .ToList(),
-                        CatchRate = ToCatchRate(speciesData.CaptureRate),
+                        BaseStatsTotal = ToBaseStatsTotal(pokemon.Stats.Sum(stat => stat.BaseStat)),
                         HasExtraTexture = entry.Stage >= 3,
                         AlternativeTextureName = entry.Stage >= 3 ? secondStageTextureName : null
                     });
@@ -182,13 +182,24 @@ public sealed class PokeApiClient
         _ => BarnType.DeluxePokeBarn
     };
 
-    private static CatchRateData ToCatchRate(int captureRate)
+    private static BaseStatsTotalData ToBaseStatsTotal(int baseStatsTotal)
     {
-        return Datasets.CatchRates.First(rate =>
+        var farmLevel = baseStatsTotal switch
         {
-            var bounds = rate.CatchRate.Split('-').Select(int.Parse).ToArray();
-            return captureRate <= bounds[0] && captureRate >= bounds[1];
-        });
+            <= 300 => 0,
+            <= 330 => 1,
+            <= 360 => 2,
+            <= 390 => 3,
+            <= 420 => 4,
+            <= 450 => 5,
+            <= 480 => 6,
+            <= 510 => 7,
+            <= 540 => 8,
+            <= 580 => 9,
+            _ => 10
+        };
+
+        return new BaseStatsTotalData(baseStatsTotal, farmLevel);
     }
 
     private sealed record PokemonEntry(
@@ -203,9 +214,6 @@ public sealed class PokeApiClient
     {
         [JsonPropertyName("gender_rate")]
         public int GenderRate { get; set; }
-
-        [JsonPropertyName("capture_rate")]
-        public int CaptureRate { get; set; }
 
         [JsonPropertyName("hatch_counter")]
         public int HatchCounter { get; set; }
@@ -249,7 +257,14 @@ public sealed class PokeApiClient
     {
         public string Name { get; set; } = "";
         public List<PokemonTypeResponse> Types { get; set; } = [];
+        public List<PokemonStatResponse> Stats { get; set; } = [];
         public List<NamedResource> Forms { get; set; } = [];
+    }
+
+    private sealed class PokemonStatResponse
+    {
+        [JsonPropertyName("base_stat")]
+        public int BaseStat { get; set; }
     }
 
     private sealed class PokemonFormResponse

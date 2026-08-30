@@ -40,9 +40,4 @@ public static class Datasets
         EggGroup.GenderUnknown
     ];
 
-    public static readonly CatchRateData[] CatchRates = [
-        new("255-237", 0), new("236-214", 1), new("213-191", 2), new("190-168", 3), new("167-145", 4), 
-        new("144-122", 5), new("121-99", 6), new("98-76", 7), new("75-53", 8), new("52-27", 9), 
-        new("26-3", 10)
-    ];
 }

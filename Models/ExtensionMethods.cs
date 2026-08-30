@@ -23,7 +23,7 @@ public static class ExtensionMethods
             targets += (string.IsNullOrEmpty(targets) ? "" : ", ")
                 + $"{config.BasePokemon()}/{pokemon.Name}, {config.BasePokemon()}/{pokemon.Name}s";
 
-        var fromFile = $"assets/{config.BasePokemon()}/{{{{TargetWithoutPath}}}}.png";
+        var fromFile = $"assets/{Constants.Folder}/{config.BasePokemon()}/{{{{TargetWithoutPath}}}}.png";
 
         return new LoadChange()
         {
@@ -42,7 +42,7 @@ public static class ExtensionMethods
             var sound = new Sound()
             {
                 ID = $"{{{{modId}}}}_sound_{pokemon.Name}",
-                FilePaths = [$"{{{{AbsoluteFilePath: assets/{config.BasePokemon()}/{pokemon.Name}.wav}}}}"]
+                FilePaths = [$"{{{{AbsoluteFilePath: assets/{Constants.Folder}/{config.BasePokemon()}/{pokemon.Name}.wav}}}}"]
             };
 
             soundChange.Entries.Add(sound.ID, sound);
@@ -97,6 +97,7 @@ public static class ExtensionMethods
 
             if (pokemon == config.Pokemon[0] && config.ShouldBeForSale)
             {
+                animal.UnlockCondition = $"{{{{{Constants.ConfigItem}}}}}";
                 animal.PurchasePrice = config.HatchCycle.PurchasePrice;
                 animal.ShopTexture = $"{config.BasePokemon()}/shopicon";
                 animal.RequiredBuilding = pokemon.BarnType;
@@ -329,7 +330,9 @@ public static class ExtensionMethods
 
         foreach (var eggGroup in input.EggGroups)
         {
-            var entryId = $"{{{{modId}}}}_item_egg_group_{eggGroup.ToString().ToLowerInvariant()}";
+            var groupName = eggGroup.ToString().ToLowerInvariant();
+
+            var entryId = $"{{{{modId}}}}_item_egg_group_{groupName}";
             if (!eggExtensionChanges.TryGetValue(entryId, out var eggExtension))
                 continue;
 
@@ -338,15 +341,9 @@ public static class ExtensionMethods
                 continue;
 
             foreach (var pokemon in input.Pokemon)
-            {
-                var spawnChance = (1d / eggExtension.AnimalSpawnList.Count).ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
-
-                eggExtension.AnimalSpawnList.Insert(0, new AnimalSpawnData
-                {
-                    Id = $"{{{{modId}}}}_spawn_egg_{eggGroup.ToString().ToLowerInvariant()}_{pokemon.Name}",
-                    AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
-                    Condition = $"PLAYER_BASE_FARMING_LEVEL current {pokemon.CatchRate.FarmLevel}, RANDOM {spawnChance}"
-                });
+            {               
+                currentListCount = eggExtension.AnimalSpawnList.Count;
+                eggExtension.AnimalSpawnList.Insert(0, CreateGroupEgg(currentListCount, groupName, pokemon));
             }
         }
 
@@ -356,18 +353,29 @@ public static class ExtensionMethods
         {
             foreach (var pokemon in input.Pokemon)
             {
-                var spawnChance = (1d / eggExtensionAll.AnimalSpawnList.Count).ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
-
-                eggExtensionAll.AnimalSpawnList.Insert(0, new AnimalSpawnData
-                {
-                    Id = $"{{{{modId}}}}_spawn_egg_all_{pokemon.Name}",
-                    AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
-                    Condition = $"PLAYER_BASE_FARMING_LEVEL current {pokemon.CatchRate.FarmLevel}, RANDOM {spawnChance}"
-                });
-            }
-                      
+                var currentListCount = eggExtensionAll.AnimalSpawnList.Count;
+                eggExtensionAll.AnimalSpawnList.Insert(0, CreateGroupEgg(currentListCount, "all", pokemon));
+            }                      
         }
 
         return eggData;
+    }
+
+    public static AnimalSpawnData CreateGroupEgg(int currentListCount, string groupName, Pokemon.Pokemon pokemon)
+    {
+        var conditions = new List<string>{ $"{{{{{Constants.ConfigItem}}}}}" };
+        if (pokemon.BaseStatsTotal.FarmLevel > 0)
+            conditions.Add($"PLAYER_BASE_FARMING_LEVEL current {pokemon.BaseStatsTotal.FarmLevel}");
+
+        var spawnChance = 1d / (currentListCount + 1);
+        if (spawnChance < 1.0)
+            conditions.Add($" RANDOM {spawnChance.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}");
+
+        return new AnimalSpawnData
+        {
+            Id = $"{{{{modId}}}}_spawn_egg_{groupName}_{pokemon.Name}",
+            AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
+            Condition = string.Join(", ", conditions)
+        };
     }
 }

@@ -6,7 +6,7 @@ public sealed class Pokemon
     public Gender Gender { get; set; }
     public BarnType BarnType { get; set; }
     public List<PokemonType> Types { get; set; } = [];
-    public CatchRateData CatchRate { get; set;} = null!;
+    public BaseStatsTotalData BaseStatsTotal { get; set; } = null!;
     public bool HasExtraTexture { get; set; }
     public string? AlternativeTextureName { get; set; }
 }

@@ -7,389 +7,673 @@
       "Target": "eggs/group, eggs/color"
     },
     {
-      "LogName": "Egg items",
       "Action": "EditData",
-      "Target": "data/objects",
       "Entries": {
-          "{{modId}}_item_egg_all": {
-              "Name": "{{modId}}_item_egg_all",
-              "DisplayName": "{{i18n:egg.all.item}}",
-              "Description": "{{i18n:egg.all.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "50",
-              "Texture": "eggs/color",
-              "SpriteIndex": "10",
-              "Edibility": "5",
-              "ContextTags": [
-                  "egg_item",
-                  "color_green"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_monster": {
-              "Name": "{{modId}}_item_egg_group_monster",
-              "DisplayName": "{{i18n:egg.group.monster.item}}",
-              "Description": "{{i18n:egg.group.monster.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "0",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_brown"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_water1": {
-              "Name": "{{modId}}_item_egg_group_water1",
-              "DisplayName": "{{i18n:egg.group.water1.item}}",
-              "Description": "{{i18n:egg.group.water1.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "1",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_cyan"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_bug": {
-              "Name": "{{modId}}_item_egg_group_bug",
-              "DisplayName": "{{i18n:egg.group.bug.item}}",
-              "Description": "{{i18n:egg.group.bug.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "2",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_yellow_green"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_flying": {
-              "Name": "{{modId}}_item_egg_group_flying",
-              "DisplayName": "{{i18n:egg.group.flying.item}}",
-              "Description": "{{i18n:egg.group.flying.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_light_cyan"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_field": {
-              "Name": "{{modId}}_item_egg_group_field",
-              "DisplayName": "{{i18n:egg.group.field.item}}",
-              "Description": "{{i18n:egg.group.field.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_sand"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_fairy": {
-              "Name": "{{modId}}_item_egg_group_fairy",
-              "DisplayName": "{{i18n:egg.group.fairy.item}}",
-              "Description": "{{i18n:egg.group.fairy.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_pink"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_grass": {
-              "Name": "{{modId}}_item_egg_group_grass",
-              "DisplayName": "{{i18n:egg.group.grass.item}}",
-              "Description": "{{i18n:egg.group.grass.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "6",
-              "ColorOverlayFromNextIndex": "True",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_green"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_humanlike": {
-              "Name": "{{modId}}_item_egg_group_humanlike",
-              "DisplayName": "{{i18n:egg.group.humanlike.item}}",
-              "Description": "{{i18n:egg.group.humanlike.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_dark_cyan"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_water3": {
-              "Name": "{{modId}}_item_egg_group_water3",
-              "DisplayName": "{{i18n:egg.group.water3.item}}",
-              "Description": "{{i18n:egg.group.water3.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_dark_blue"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_mineral": {
-              "Name": "{{modId}}_item_egg_group_mineral",
-              "DisplayName": "{{i18n:egg.group.mineral.item}}",
-              "Description": "{{i18n:egg.group.mineral.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_gray"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_amorphous": {
-              "Name": "{{modId}}_item_egg_group_amorphous",
-              "DisplayName": "{{i18n:egg.group.amorphous.item}}",
-              "Description": "{{i18n:egg.group.amorphous.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_purple"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_water2": {
-              "Name": "{{modId}}_item_egg_group_water2",
-              "DisplayName": "{{i18n:egg.group.water2.item}}",
-              "Description": "{{i18n:egg.group.water2.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_blue"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_ditto": {
-              "Name": "{{modId}}_item_egg_group_ditto",
-              "DisplayName": "{{i18n:egg.group.ditto.item}}",
-              "Description": "{{i18n:egg.group.ditto.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_dark_purple"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_dragon": {
-              "Name": "{{modId}}_item_egg_group_dragon",
-              "DisplayName": "{{i18n:egg.group.dragon.item}}",
-              "Description": "{{i18n:egg.group.dragon.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "200",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "20",
-              "ContextTags": [
-                  "egg_item",
-                  "color_poppyseed"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_noeggsdiscovered": {
-              "Name": "{{modId}}_item_egg_group_noeggsdiscovered",
-              "DisplayName": "{{i18n:egg.group.noeggsdiscovered.item}}",
-              "Description": "{{i18n:egg.group.noeggsdiscovered.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "2000",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "200",
-              "ContextTags": [
-                  "egg_item",
-                  "color_yellow"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          },
-          "{{modId}}_item_egg_group_unknowngender": {
-              "Name": "{{modId}}_item_egg_group_unknowngender",
-              "DisplayName": "{{i18n:egg.group.unknowngender.item}}",
-              "Description": "{{i18n:egg.group.unknowngender.item.description}}",
-              "Type": "Basic",
-              "Category": "-5",
-              "Price": "1500",
-              "Texture": "eggs/group",
-              "SpriteIndex": "3",
-              "Edibility": "150",
-              "ContextTags": [
-                  "egg_item",
-                  "color_blue"
-              ],
-              "ExcludeFromShippingCollection": "True"
-          }
-      }
+        "{{modId}}_item_egg_all": {
+          "Name": "{{modId}}_item_egg_all",
+          "DisplayName": "{{i18n:egg.all.item}}",
+          "Description": "{{i18n:egg.all.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "50",
+          "Texture": "eggs/color",
+          "SpriteIndex": "10",
+          "Edibility": "5",
+          "ContextTags": [
+            "egg_item",
+            "color_green"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_monster": {
+          "Name": "{{modId}}_item_egg_group_monster",
+          "DisplayName": "{{i18n:egg.group.monster.item}}",
+          "Description": "{{i18n:egg.group.monster.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "0",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_brown"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_water1": {
+          "Name": "{{modId}}_item_egg_group_water1",
+          "DisplayName": "{{i18n:egg.group.water1.item}}",
+          "Description": "{{i18n:egg.group.water1.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "1",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_cyan"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_bug": {
+          "Name": "{{modId}}_item_egg_group_bug",
+          "DisplayName": "{{i18n:egg.group.bug.item}}",
+          "Description": "{{i18n:egg.group.bug.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "2",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_yellow_green"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_flying": {
+          "Name": "{{modId}}_item_egg_group_flying",
+          "DisplayName": "{{i18n:egg.group.flying.item}}",
+          "Description": "{{i18n:egg.group.flying.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_light_cyan"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_field": {
+          "Name": "{{modId}}_item_egg_group_field",
+          "DisplayName": "{{i18n:egg.group.field.item}}",
+          "Description": "{{i18n:egg.group.field.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_sand"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_fairy": {
+          "Name": "{{modId}}_item_egg_group_fairy",
+          "DisplayName": "{{i18n:egg.group.fairy.item}}",
+          "Description": "{{i18n:egg.group.fairy.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_pink"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_grass": {
+          "Name": "{{modId}}_item_egg_group_grass",
+          "DisplayName": "{{i18n:egg.group.grass.item}}",
+          "Description": "{{i18n:egg.group.grass.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "6",
+          "ColorOverlayFromNextIndex": "True",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_green"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_humanlike": {
+          "Name": "{{modId}}_item_egg_group_humanlike",
+          "DisplayName": "{{i18n:egg.group.humanlike.item}}",
+          "Description": "{{i18n:egg.group.humanlike.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_dark_cyan"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_water3": {
+          "Name": "{{modId}}_item_egg_group_water3",
+          "DisplayName": "{{i18n:egg.group.water3.item}}",
+          "Description": "{{i18n:egg.group.water3.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_dark_blue"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_mineral": {
+          "Name": "{{modId}}_item_egg_group_mineral",
+          "DisplayName": "{{i18n:egg.group.mineral.item}}",
+          "Description": "{{i18n:egg.group.mineral.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_gray"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_amorphous": {
+          "Name": "{{modId}}_item_egg_group_amorphous",
+          "DisplayName": "{{i18n:egg.group.amorphous.item}}",
+          "Description": "{{i18n:egg.group.amorphous.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_purple"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_water2": {
+          "Name": "{{modId}}_item_egg_group_water2",
+          "DisplayName": "{{i18n:egg.group.water2.item}}",
+          "Description": "{{i18n:egg.group.water2.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_blue"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_ditto": {
+          "Name": "{{modId}}_item_egg_group_ditto",
+          "DisplayName": "{{i18n:egg.group.ditto.item}}",
+          "Description": "{{i18n:egg.group.ditto.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_dark_purple"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_dragon": {
+          "Name": "{{modId}}_item_egg_group_dragon",
+          "DisplayName": "{{i18n:egg.group.dragon.item}}",
+          "Description": "{{i18n:egg.group.dragon.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "200",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "20",
+          "ContextTags": [
+            "egg_item",
+            "color_poppyseed"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_noeggsdiscovered": {
+          "Name": "{{modId}}_item_egg_group_noeggsdiscovered",
+          "DisplayName": "{{i18n:egg.group.noeggsdiscovered.item}}",
+          "Description": "{{i18n:egg.group.noeggsdiscovered.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "2000",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "200",
+          "ContextTags": [
+            "egg_item",
+            "color_yellow"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        },
+        "{{modId}}_item_egg_group_unknowngender": {
+          "Name": "{{modId}}_item_egg_group_unknowngender",
+          "DisplayName": "{{i18n:egg.group.unknowngender.item}}",
+          "Description": "{{i18n:egg.group.unknowngender.item.description}}",
+          "Type": "Basic",
+          "Category": "-5",
+          "Price": "1500",
+          "Texture": "eggs/group",
+          "SpriteIndex": "3",
+          "Edibility": "150",
+          "ContextTags": [
+            "egg_item",
+            "color_blue"
+          ],
+          "ExcludeFromShippingCollection": "True"
+        }
+      },
+      "LogName": "Egg items",
+      "Target": "data/objects"
     },
     {
       "Action": "EditData",
       "Entries": {
         "{{modId}}_item_egg_all": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_all_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_all_pidgeot",
+              "AnimalId": "{{modId}}_pokemon_pidgeot",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 6,  RANDOM 0.048"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_pidgeotto",
+              "AnimalId": "{{modId}}_pokemon_pidgeotto",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 2,  RANDOM 0.050"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_pidgey",
+              "AnimalId": "{{modId}}_pokemon_pidgey",
+              "Condition": "{{Kanto active}},  RANDOM 0.053"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_beedrill",
+              "AnimalId": "{{modId}}_pokemon_beedrill",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.056"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_kakuna",
+              "AnimalId": "{{modId}}_pokemon_kakuna",
+              "Condition": "{{Kanto active}},  RANDOM 0.059"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_weedle",
+              "AnimalId": "{{modId}}_pokemon_weedle",
+              "Condition": "{{Kanto active}},  RANDOM 0.062"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_butterfree_female",
+              "AnimalId": "{{modId}}_pokemon_butterfree_female",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.067"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_butterfree_male",
+              "AnimalId": "{{modId}}_pokemon_butterfree_male",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.071"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_metapod",
+              "AnimalId": "{{modId}}_pokemon_metapod",
+              "Condition": "{{Kanto active}},  RANDOM 0.077"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_caterpie",
+              "AnimalId": "{{modId}}_pokemon_caterpie",
+              "Condition": "{{Kanto active}},  RANDOM 0.083"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_charizard",
+              "AnimalId": "{{modId}}_pokemon_charizard",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.091"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_charmeleon",
+              "AnimalId": "{{modId}}_pokemon_charmeleon",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.100"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_charmander",
+              "AnimalId": "{{modId}}_pokemon_charmander",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.111"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_blastoise",
+              "AnimalId": "{{modId}}_pokemon_blastoise",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.125"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_wartortle",
+              "AnimalId": "{{modId}}_pokemon_wartortle",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.143"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_squirtle",
+              "AnimalId": "{{modId}}_pokemon_squirtle",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.167"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_venusaur_female",
+              "AnimalId": "{{modId}}_pokemon_venusaur_female",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.200"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_venusaur_male",
+              "AnimalId": "{{modId}}_pokemon_venusaur_male",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_ivysaur",
+              "AnimalId": "{{modId}}_pokemon_ivysaur",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_all_bulbasaur",
+              "AnimalId": "{{modId}}_pokemon_bulbasaur",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_all_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_monster": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_monster_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_monster_charizard",
+              "AnimalId": "{{modId}}_pokemon_charizard",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.091"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_charmeleon",
+              "AnimalId": "{{modId}}_pokemon_charmeleon",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.100"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_charmander",
+              "AnimalId": "{{modId}}_pokemon_charmander",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.111"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_blastoise",
+              "AnimalId": "{{modId}}_pokemon_blastoise",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.125"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_wartortle",
+              "AnimalId": "{{modId}}_pokemon_wartortle",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.143"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_squirtle",
+              "AnimalId": "{{modId}}_pokemon_squirtle",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.167"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_venusaur_female",
+              "AnimalId": "{{modId}}_pokemon_venusaur_female",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.200"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_venusaur_male",
+              "AnimalId": "{{modId}}_pokemon_venusaur_male",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_ivysaur",
+              "AnimalId": "{{modId}}_pokemon_ivysaur",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_monster_bulbasaur",
+              "AnimalId": "{{modId}}_pokemon_bulbasaur",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_monster_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_water1": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_water1_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_water1_blastoise",
+              "AnimalId": "{{modId}}_pokemon_blastoise",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_water1_wartortle",
+              "AnimalId": "{{modId}}_pokemon_wartortle",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_water1_squirtle",
+              "AnimalId": "{{modId}}_pokemon_squirtle",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_water1_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_bug": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_bug_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_bug_beedrill",
+              "AnimalId": "{{modId}}_pokemon_beedrill",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.125"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_bug_kakuna",
+              "AnimalId": "{{modId}}_pokemon_kakuna",
+              "Condition": "{{Kanto active}},  RANDOM 0.143"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_bug_weedle",
+              "AnimalId": "{{modId}}_pokemon_weedle",
+              "Condition": "{{Kanto active}},  RANDOM 0.167"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_bug_butterfree_female",
+              "AnimalId": "{{modId}}_pokemon_butterfree_female",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.200"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_bug_butterfree_male",
+              "AnimalId": "{{modId}}_pokemon_butterfree_male",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_bug_metapod",
+              "AnimalId": "{{modId}}_pokemon_metapod",
+              "Condition": "{{Kanto active}},  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_bug_caterpie",
+              "AnimalId": "{{modId}}_pokemon_caterpie",
+              "Condition": "{{Kanto active}},  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_bug_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_flying": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_flying_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_flying_pidgeot",
+              "AnimalId": "{{modId}}_pokemon_pidgeot",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 6,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_flying_pidgeotto",
+              "AnimalId": "{{modId}}_pokemon_pidgeotto",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 2,  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_flying_pidgey",
+              "AnimalId": "{{modId}}_pokemon_pidgey",
+              "Condition": "{{Kanto active}},  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_flying_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_field": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_field_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_field_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_fairy": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_fairy_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_fairy_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_grass": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_grass_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_grass_venusaur_female",
+              "AnimalId": "{{modId}}_pokemon_venusaur_female",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.200"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_grass_venusaur_male",
+              "AnimalId": "{{modId}}_pokemon_venusaur_male",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_grass_ivysaur",
+              "AnimalId": "{{modId}}_pokemon_ivysaur",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_grass_bulbasaur",
+              "AnimalId": "{{modId}}_pokemon_bulbasaur",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_grass_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_humanlike": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_humanlike_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_humanlike_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_water3": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_water3_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_water3_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_mineral": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_mineral_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_mineral_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_amorphous": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_amorphous_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_amorphous_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_water2": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_water2_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_water2_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_ditto": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_ditto_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_ditto_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_dragon": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_dragon_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_dragon_charizard",
+              "AnimalId": "{{modId}}_pokemon_charizard",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 8,  RANDOM 0.250"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_dragon_charmeleon",
+              "AnimalId": "{{modId}}_pokemon_charmeleon",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 4,  RANDOM 0.333"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_dragon_charmander",
+              "AnimalId": "{{modId}}_pokemon_charmander",
+              "Condition": "{{Kanto active}}, PLAYER_BASE_FARMING_LEVEL current 1,  RANDOM 0.500"
+            },
+            {
+              "Id": "{{modId}}_spawn_egg_group_dragon_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_noeggsdiscovered": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_nogeggsdiscovered_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_nogeggsdiscovered_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         },
         "{{modId}}_item_egg_group_unknowngender": {
-            "AnimalSpawnList": [{
-                "Id": "{{modId}}_spawn_egg_group_unknowngender_default",
-                "AnimalId": "Golden Chicken"
-            }]
+          "AnimalSpawnList": [
+            {
+              "Id": "{{modId}}_spawn_egg_group_unknowngender_default",
+              "AnimalId": "Golden Chicken"
+            }
+          ]
         }
       },
       "LogName": "Fill eggs",

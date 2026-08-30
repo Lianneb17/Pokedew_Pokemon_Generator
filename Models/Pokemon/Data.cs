@@ -9,4 +9,4 @@ public sealed record LevelspeedData(
 
 public sealed record ColorData(string Color, int SpriteIndex);
 
-public sealed record CatchRateData(string CatchRate, int FarmLevel);
+public sealed record BaseStatsTotalData(int BaseStatsTotal, int FarmLevel);
