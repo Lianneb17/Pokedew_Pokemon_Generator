@@ -65,7 +65,7 @@ public static class ExtensionMethods
             };
 
             if (pokemon != config.Pokemon[0])
-                skin.BabyTexture = $"{config.BasePokemon()}/{config.BasePokemon()}";
+                skin.BabyTexture = $"{config.BasePokemon()}/{config.BasePokemon()}s";
 
             var animal = new Animal()
             {
@@ -85,7 +85,8 @@ public static class ExtensionMethods
                 DaysToProduce = config.HatchCycle.DaysToProduce,
                 ProduceOnMature = true,
                 Sound = $"{{{{modId}}}}_sound_{pokemon.Name}",
-                Texture = $"{pokemon.Name}/{pokemon.Name}",
+                Texture = $"{config.BasePokemon()}/{pokemon.Name}",
+                BabyTexture = pokemon != config.Pokemon[0] ? $"{config.BasePokemon()}/{config.BasePokemon()}" : null,
                 SpriteWidth = config.SpriteWidth,
                 SpriteHeight = config.SpriteHeight,
                 Skins = [skin],
@@ -369,7 +370,7 @@ public static class ExtensionMethods
 
         var spawnChance = 1d / (currentListCount + 1);
         if (spawnChance < 1.0)
-            conditions.Add($" RANDOM {spawnChance.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}");
+            conditions.Add($"RANDOM {spawnChance.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}");
 
         return new AnimalSpawnData
         {

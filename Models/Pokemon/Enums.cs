@@ -3,8 +3,7 @@ namespace PokemonJsonGenerator.Models.Pokemon;
 public enum Gender { 
     Male, 
     Female, 
-    MaleOrFemale,
-    Genderless
+    MaleOrFemale
 }
 
 public enum BarnType { 

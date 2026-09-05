@@ -19,14 +19,11 @@ public sealed class PokeApiClient
             Levelspeed = ToLevelspeed(baseSpecies.GrowthRate.Name),
             Color = Datasets.Colors.First(color =>
                 string.Equals(color.Color, baseSpecies.Color.Name, StringComparison.OrdinalIgnoreCase)),
-            EggGroups = baseSpecies.EggGroups
-                .Select(group => ToEggGroup(group.Name))
-                .ToList(),
-            SpriteWidth = 888,
-            SpriteHeight = 999
+            EggGroups = [.. baseSpecies.EggGroups.Select(group => ToEggGroup(group.Name))],
+            SpriteWidth = 29,
+            SpriteHeight = 21,
+            Pokemon = await BuildPokemonAsync(baseSpecies)
         };
-
-        config.Pokemon = await BuildPokemonAsync(baseSpecies);
         return config;
     }
 
@@ -161,8 +158,9 @@ public sealed class PokeApiClient
 
     private static List<Gender> GetGenders(int genderRate, bool hasGenderDifferences)
     {
+        // Genderless = both
         if (genderRate == -1)
-            return [Gender.Genderless];
+            return [Gender.MaleOrFemale];
 
         if (hasGenderDifferences)
             return [Gender.Male, Gender.Female];
