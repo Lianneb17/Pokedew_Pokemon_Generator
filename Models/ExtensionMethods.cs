@@ -111,7 +111,7 @@ public static class ExtensionMethods
 
         foreach (var pokemon in config.Pokemon.GroupBy(pokemon => pokemon.Name).Select(group => group.First()))
         {
-            var exportName = pokemon.ExportName(config);
+            var exportName = pokemon.Name;
             var sound = new Sound()
             {
                 ID = $"{{{{modId}}}}_sound_{exportName}",
@@ -158,7 +158,7 @@ public static class ExtensionMethods
                 }],
                 DaysToProduce = config.HatchCycle.DaysToProduce,
                 ProduceOnMature = true,
-                Sound = $"{{{{modId}}}}_sound_{config.Pokemon.First(other => other.Name == pokemon.Name).ExportName(config)}",
+                Sound = $"{{{{modId}}}}_sound_{pokemon.Name}",
                 Texture = $"{config.BasePokemon()}/{exportName}",
                 BabyTexture = pokemon != config.Pokemon[0] ? $"{config.BasePokemon()}/{config.BasePokemon()}" : null,
                 SpriteWidth = config.SpriteWidth,

@@ -34,6 +34,7 @@ public static class JsonGenerator
 
     public static DataJson GenerateStardewPokemon(Group config)
     {
+        var soundConfig = config;
         config = config.ForExport();
 
         if (config.Pokemon.Count == 0)
@@ -43,7 +44,7 @@ public static class JsonGenerator
         {
             Changes = [
                 config.BuildLoadImages(),
-                config.BuildSoundChanges(),
+                soundConfig.BuildSoundChanges(),
                 config.BuildAnimalChanges(),
                 config.BuildEggData(),
                 config.BuildEggExtensionData()
