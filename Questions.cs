@@ -5,8 +5,6 @@ namespace PokemonJsonGenerator;
 
 public static class Questions
 {
-    public static string AskBasePokemonName() => AskString("Basis-Pokémon");
-
     public static async Task<Group> AskGeneratorConfig()
     {
         Console.WriteLine("=== Pokémon JSON Generator ===");

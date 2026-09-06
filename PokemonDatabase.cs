@@ -81,22 +81,40 @@ public sealed class PokemonDatabase
             ("$forSale", group.ShouldBeForSale ? 1 : 0),
             ("$evolutions", JsonSerializer.Serialize(group.Evolutions)));
 
+        var hasExtraTextureColumn = await HasColumnAsync(connection, "pokemon", "has_extra_texture");
         foreach (var pokemon in NormalizePokemon(group.Pokemon))
         {
-            await ExecuteAsync(connection, transaction, """
-                INSERT INTO pokemon
-                    (base_pokemon_name, name, gender, barn_type, types,
-                     base_stats_total, has_gender_variants)
-                VALUES ($group, $name, $gender, $barnType, $types,
-                    $baseStatsTotal, $hasGenderVariants);
-                """,
+            var sql = hasExtraTextureColumn
+                ? """
+                    INSERT INTO pokemon
+                        (base_pokemon_name, name, gender, barn_type, types,
+                         base_stats_total, has_gender_variants, has_extra_texture)
+                    VALUES ($group, $name, $gender, $barnType, $types,
+                        $baseStatsTotal, $hasGenderVariants, $hasExtraTexture);
+                    """
+                : """
+                    INSERT INTO pokemon
+                        (base_pokemon_name, name, gender, barn_type, types,
+                         base_stats_total, has_gender_variants)
+                    VALUES ($group, $name, $gender, $barnType, $types,
+                        $baseStatsTotal, $hasGenderVariants);
+                    """;
+
+            var parameters = new List<(string Name, object Value)>
+            {
                 ("$group", group.BasePokemon()),
                 ("$name", pokemon.Name),
                 ("$gender", pokemon.Gender.ToString()),
                 ("$barnType", pokemon.BarnType.ToString()),
                 ("$types", JsonSerializer.Serialize(pokemon.Types)),
                 ("$baseStatsTotal", JsonSerializer.Serialize(pokemon.BaseStatsTotal)),
-                ("$hasGenderVariants", pokemon.HasGenderVariants ? 1 : 0));
+                ("$hasGenderVariants", pokemon.HasGenderVariants ? 1 : 0)
+            };
+
+            if (hasExtraTextureColumn)
+                parameters.Add(("$hasExtraTexture", 0));
+
+            await ExecuteAsync(connection, transaction, sql, [.. parameters]);
         }
 
         await transaction.CommitAsync();
@@ -147,6 +165,24 @@ public sealed class PokemonDatabase
         }
 
         return group;
+    }
+
+    public async Task<List<Group>> LoadGroupsAsync()
+    {
+        await using var connection = await OpenConnectionAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT base_pokemon_name FROM groups ORDER BY base_pokemon_name;";
+
+        var groupNames = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+            groupNames.Add(reader.GetString(0));
+
+        var groups = new List<Group>();
+        foreach (var groupName in groupNames)
+            groups.Add(await LoadGroupAsync(groupName));
+
+        return groups;
     }
 
     private static async Task EnsureEvolutionsColumnAsync(SqliteConnection connection)
@@ -204,6 +240,24 @@ public sealed class PokemonDatabase
             );
             """;
         await command.ExecuteNonQueryAsync();
+    }
+
+    private static async Task<bool> HasColumnAsync(
+        SqliteConnection connection,
+        string tableName,
+        string columnName)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info({tableName});";
+        await using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            if (string.Equals(reader.GetString(1), columnName, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     private static List<Pokemon> NormalizePokemon(IReadOnlyList<Pokemon> pokemon)

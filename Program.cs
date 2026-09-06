@@ -36,13 +36,6 @@ internal static class Program
             if (option != "2")
                 throw new InvalidOperationException("Ongeldige keuze.");
 
-            var storedInput = await database.LoadGroupAsync(Questions.AskBasePokemonName());
-
-            var pokemonPath = Path.Combine(
-                Environment.CurrentDirectory,
-                "Result",
-                $"{storedInput.BasePokemon()}data.json");
-
             var eggPath = Path.Combine(
                 Environment.CurrentDirectory,
                 "eggdata.json");
@@ -50,17 +43,25 @@ internal static class Program
             var resultEggPath = Path.Combine(resultDirectory, "eggdata.json");
             Directory.CreateDirectory(resultDirectory);
 
-            JsonGenerator.Write(storedInput, pokemonPath);
+            var storedGroups = await database.LoadGroupsAsync();
+            foreach (var storedGroup in storedGroups)
+            {
+                var groupPokemonPath = Path.Combine(
+                    resultDirectory,
+                    $"{storedGroup.BasePokemon()}data.json");
+
+                JsonGenerator.Write(storedGroup, groupPokemonPath);
+                Console.WriteLine($"JSON geschreven naar: {groupPokemonPath}");
+            }
+
+            var eggData = JsonGenerator.Read(eggPath);
+            var exportGroups = storedGroups.Select(group => group.ForExport()).ToList();
+            exportGroups.UpdateEggs(eggData);
+
+            JsonGenerator.Write(eggData, resultEggPath);
 
             Console.WriteLine();
             Console.WriteLine("=== Klaar ===");
-            Console.WriteLine($"JSON geschreven naar:");
-            Console.WriteLine(pokemonPath);
-            Console.WriteLine($"Database bijgewerkt: {databasePath}");
-
-            var eggData = JsonGenerator.Read(eggPath);
-            JsonGenerator.Write(storedInput.ForExport().UpdateEggs(eggData), resultEggPath);
-
             Console.WriteLine(resultEggPath);
         }
         catch (Exception ex)
