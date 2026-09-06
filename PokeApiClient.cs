@@ -12,9 +12,11 @@ public sealed class PokeApiClient
     public async Task<Group> BuildGroupAsync(string name)
     {
         var baseSpecies = await GetAsync<PokemonSpeciesResponse>($"pokemon-species/{name}");
+        var evolutionChain = await GetAsync<EvolutionChainResponse>(baseSpecies.EvolutionChain.Url);
 
         var config = new Group
         {
+            BasePokemonName = evolutionChain.Chain.Species.Name.Replace('-', '_'),
             HatchCycle = ToHatchCycle(baseSpecies.HatchCounter),
             Levelspeed = ToLevelspeed(baseSpecies.GrowthRate.Name),
             Color = Datasets.Colors.First(color =>
@@ -22,20 +24,21 @@ public sealed class PokeApiClient
             EggGroups = [.. baseSpecies.EggGroups.Select(group => ToEggGroup(group.Name))],
             SpriteWidth = 29,
             SpriteHeight = 21,
-            Pokemon = await BuildPokemonAsync(baseSpecies)
+            Evolutions = BuildEvolutions(evolutionChain.Chain),
+            Pokemon = await BuildPokemonAsync(baseSpecies, evolutionChain)
         };
         return config;
     }
 
-    private async Task<List<Pokemon>> BuildPokemonAsync(PokemonSpeciesResponse baseSpecies)
+    private async Task<List<Pokemon>> BuildPokemonAsync(
+        PokemonSpeciesResponse baseSpecies,
+        EvolutionChainResponse evolutionChain)
     {
-        var evolutionChain = await GetAsync<EvolutionChainResponse>(baseSpecies.EvolutionChain.Url);
         var entries = new List<PokemonEntry>();
 
         AddEvolutionEntries(evolutionChain.Chain, 1, entries);
 
         var result = new List<Pokemon>();
-        string? secondStageTextureName = null;
         foreach (var entry in entries)
         {
             var speciesData = await GetAsync<PokemonSpeciesResponse>(entry.SpeciesUrl);
@@ -50,24 +53,17 @@ public sealed class PokeApiClient
                 foreach (var gender in genders)
                 {
                     var entryName = pokemon.Name.Replace('-', '_');
-                    if (genders.Count > 1)
-                        entryName += $"_{gender.ToString().ToLowerInvariant()}";
-
-                    if (entry.Stage == 2 && secondStageTextureName is null)
-                        secondStageTextureName = entryName;
 
                     result.Add(new Pokemon
                     {
                         Name = entryName,
                         Gender = gender,
+                        HasGenderVariants = genders.Count > 1,
                         BarnType = GetBarnType(entry.Stage),
-                        Types = pokemon.Types
+                        Types = [.. pokemon.Types
                             .OrderBy(type => type.Slot)
-                            .Select(type => Enum.Parse<PokemonType>(type.Type.Name, true))
-                            .ToList(),
-                        BaseStatsTotal = ToBaseStatsTotal(pokemon.Stats.Sum(stat => stat.BaseStat)),
-                        HasExtraTexture = entry.Stage >= 3,
-                        AlternativeTextureName = entry.Stage >= 3 ? secondStageTextureName : null
+                            .Select(type => Enum.Parse<PokemonType>(type.Type.Name, true))],
+                        BaseStatsTotal = ToBaseStatsTotal(pokemon.Stats.Sum(stat => stat.BaseStat))
                     });
                 }
             }
@@ -148,6 +144,38 @@ public sealed class PokeApiClient
 
         foreach (var next in link.EvolvesTo)
             AddEvolutionEntries(next, stage + 1, entries);
+    }
+
+    private static List<Evolution> BuildEvolutions(EvolutionChainLink root)
+    {
+        var evolutions = new List<Evolution>();
+        AddEvolutions(root, 2, evolutions);
+        return evolutions;
+    }
+
+    private static void AddEvolutions(
+        EvolutionChainLink link,
+        int stage,
+        ICollection<Evolution> evolutions)
+    {
+        var from = link.Species.Name.Replace('-', '_');
+        foreach (var next in link.EvolvesTo)
+        {
+            foreach (var detail in next.EvolutionDetails)
+            {
+                evolutions.Add(new Evolution
+                {
+                    From = from,
+                    To = next.Species.Name.Replace('-', '_'),
+                    Stage = stage,
+                    Trigger = detail.Trigger?.Name,
+                    MinimumLevel = detail.MinimumLevel,
+                    Item = detail.Item?.Name
+                });
+            }
+
+            AddEvolutions(next, stage + 1, evolutions);
+        }
     }
 
     private async Task<T> GetAsync<T>(string url)
@@ -249,6 +277,18 @@ public sealed class PokeApiClient
 
         [JsonPropertyName("evolves_to")]
         public List<EvolutionChainLink> EvolvesTo { get; set; } = [];
+
+        [JsonPropertyName("evolution_details")]
+        public List<EvolutionDetails> EvolutionDetails { get; set; } = [];
+    }
+
+    private sealed class EvolutionDetails
+    {
+        public NamedResource? Item { get; set; }
+        public NamedResource? Trigger { get; set; }
+
+        [JsonPropertyName("min_level")]
+        public int? MinimumLevel { get; set; }
     }
 
     private sealed class PokemonResponse

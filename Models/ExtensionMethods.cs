@@ -5,12 +5,84 @@ namespace PokemonJsonGenerator.Models;
 
 public static class ExtensionMethods
 {    
+    public static Group ForExport(this Group config)
+    {
+        return new Group
+        {
+            BasePokemonName = config.BasePokemonName,
+            HatchCycle = config.HatchCycle,
+            Levelspeed = config.Levelspeed,
+            Color = config.Color,
+            EggGroups = config.EggGroups,
+            SpriteWidth = config.SpriteWidth,
+            SpriteHeight = config.SpriteHeight,
+            ShouldBeForSale = config.ShouldBeForSale,
+            Evolutions = config.Evolutions,
+            Pokemon = config.Pokemon.SelectMany(ExpandGenderVariants).ToList()
+        };
+    }
+
+    private static IEnumerable<Pokemon.Pokemon> ExpandGenderVariants(Pokemon.Pokemon pokemon)
+    {
+        if (!pokemon.HasGenderVariants)
+            return [pokemon];
+
+        return [CopyWithGender(pokemon, Gender.Male), CopyWithGender(pokemon, Gender.Female)];
+    }
+
+    private static Pokemon.Pokemon CopyWithGender(Pokemon.Pokemon pokemon, Gender gender)
+    {
+        return new Pokemon.Pokemon
+        {
+            Name = pokemon.Name,
+            Gender = gender,
+            HasGenderVariants = true,
+            BarnType = pokemon.BarnType,
+            Types = pokemon.Types,
+            BaseStatsTotal = pokemon.BaseStatsTotal,
+        };
+    }
+
+    public static string ExportName(this Pokemon.Pokemon pokemon, Group config)
+    {
+        var hasGenderVariants = config.Pokemon.Any(other =>
+            other.Name == pokemon.Name && other.Gender != Gender.MaleOrFemale);
+
+        return hasGenderVariants
+            ? $"{pokemon.Name}_{pokemon.Gender.ToString().ToLowerInvariant()}"
+            : pokemon.Name;
+    }
+
     public static string BasePokemon(this Group config)
     {
         if (config.Pokemon.Count == 0)
             throw new InvalidOperationException("Er is geen Pokémon toegevoegd.");
 
-        return config.Pokemon[0].Name;
+        return string.IsNullOrWhiteSpace(config.BasePokemonName)
+            ? config.Pokemon[0].Name
+            : config.BasePokemonName;
+    }
+
+    public static int EvolutionStage(this Pokemon.Pokemon pokemon, Group config)
+    {
+        if (string.Equals(pokemon.Name, config.BasePokemon(), StringComparison.OrdinalIgnoreCase))
+            return 1;
+
+        return config.Evolutions
+            .Where(evolution => string.Equals(evolution.To, pokemon.Name, StringComparison.OrdinalIgnoreCase))
+            .Select(evolution => evolution.Stage)
+            .DefaultIfEmpty(1)
+            .Max();
+    }
+
+    private static string? AlternativeTextureName(this Pokemon.Pokemon pokemon, Group config)
+    {
+        if (pokemon.EvolutionStage(config) < 3)
+            return null;
+
+        return config.Pokemon
+            .FirstOrDefault(other => other.EvolutionStage(config) == 2)
+            ?.Name;
     }
 
     public static LoadChange BuildLoadImages(this Group config)
@@ -21,7 +93,7 @@ public static class ExtensionMethods
 
         foreach (var pokemon in config.Pokemon)
             targets += (string.IsNullOrEmpty(targets) ? "" : ", ")
-                + $"{config.BasePokemon()}/{pokemon.Name}, {config.BasePokemon()}/{pokemon.Name}s";
+                + $"{config.BasePokemon()}/{pokemon.ExportName(config)}, {config.BasePokemon()}/{pokemon.ExportName(config)}s";
 
         var fromFile = $"assets/{Constants.Folder}/{config.BasePokemon()}/{{{{TargetWithoutPath}}}}.png";
 
@@ -39,10 +111,11 @@ public static class ExtensionMethods
 
         foreach (var pokemon in config.Pokemon)
         {
+            var exportName = pokemon.ExportName(config);
             var sound = new Sound()
             {
-                ID = $"{{{{modId}}}}_sound_{pokemon.Name}",
-                FilePaths = [$"{{{{AbsoluteFilePath: assets/{Constants.Folder}/{config.BasePokemon()}/{pokemon.Name}.wav}}}}"]
+                ID = $"{{{{modId}}}}_sound_{exportName}",
+                FilePaths = [$"{{{{AbsoluteFilePath: assets/{Constants.Folder}/{config.BasePokemon()}/{exportName}.wav}}}}"]
             };
 
             soundChange.Entries.Add(sound.ID, sound);
@@ -57,11 +130,12 @@ public static class ExtensionMethods
 
         foreach (var pokemon in config.Pokemon)
         {
+            var exportName = pokemon.ExportName(config);
             var skin = new Skin
             {
-                ID = $"{{{{modId}}}}_pokemon_{pokemon.Name}_shiny",
+                ID = $"{{{{modId}}}}_pokemon_{exportName}_shiny",
                 Weight = 0.1,
-                Texture = $"{config.BasePokemon()}/{pokemon.Name}s"
+                Texture = $"{config.BasePokemon()}/{exportName}s"
             };
 
             if (pokemon != config.Pokemon[0])
@@ -69,8 +143,8 @@ public static class ExtensionMethods
 
             var animal = new Animal()
             {
-                ID = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
-                DisplayName = $"{{{{i18n:pokemon.{pokemon.Name}}}}}",
+                ID = $"{{{{modId}}}}_pokemon_{exportName}",
+                DisplayName = $"{{{{i18n:pokemon.{exportName}}}}}",
                 House = pokemon.BarnType,
                 Gender = pokemon.Gender,
                 EggItemIds = config.GetEggItemIds(),
@@ -79,13 +153,13 @@ public static class ExtensionMethods
                 DaysToMature = config.Levelspeed.DaysToMature,
                 CanGetPregnant = false,
                 ProduceItemIds = [new ProduceItem {
-                    Id = $"{{{{modId}}}}_pokemon_produceItem_egg_{pokemon.Name}",
+                    Id = $"{{{{modId}}}}_pokemon_produceItem_egg_{exportName}",
                     ItemID = $"{{{{modId}}}}_item_egg_{config.BasePokemon()}"
                 }],
                 DaysToProduce = config.HatchCycle.DaysToProduce,
                 ProduceOnMature = true,
-                Sound = $"{{{{modId}}}}_sound_{pokemon.Name}",
-                Texture = $"{config.BasePokemon()}/{pokemon.Name}",
+                Sound = $"{{{{modId}}}}_sound_{exportName}",
+                Texture = $"{config.BasePokemon()}/{exportName}",
                 BabyTexture = pokemon != config.Pokemon[0] ? $"{config.BasePokemon()}/{config.BasePokemon()}" : null,
                 SpriteWidth = config.SpriteWidth,
                 SpriteHeight = config.SpriteHeight,
@@ -102,7 +176,7 @@ public static class ExtensionMethods
                 animal.PurchasePrice = config.HatchCycle.PurchasePrice;
                 animal.ShopTexture = $"{config.BasePokemon()}/shopicon";
                 animal.RequiredBuilding = pokemon.BarnType;
-                animal.ShopDescription = $"{{{{i18n:pokemon.{pokemon.Name}.shop}}}}";
+                animal.ShopDescription = $"{{{{i18n:pokemon.{exportName}.shop}}}}";
                 animal.ShopMissingBuildingDescription = "{{i18n:pokemon.all.shop.missing}}";
                 animal.ShowInSummitCredits = true;
 
@@ -117,7 +191,7 @@ public static class ExtensionMethods
                     {
                         ID = $"{{{{modId}}}}_pokemon_purchase_{config.BasePokemon()}_{purchaseGroup.Key}",
                         AnimalIDs = purchaseGroup
-                            .Select(item => $"{{{{modId}}}}_pokemon_{item.purchasePokemon.Name}")
+                            .Select(item => $"{{{{modId}}}}_pokemon_{item.purchasePokemon.ExportName(config)}")
                             .ToList()
                     };
 
@@ -136,7 +210,7 @@ public static class ExtensionMethods
 
             if (pokemon.Types.Contains(PokemonType.Electric)) {
                 var battery = new ProduceItem {
-                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_battery_{pokemon.Name}",
+                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_battery_{pokemon.ExportName(config)}",
                     ItemID = "787",
                     Condition = "WEATHER Here Storm"
                 };
@@ -145,7 +219,7 @@ public static class ExtensionMethods
 
             if (pokemon.Types.Contains(PokemonType.Fairy)) {
                 var fairydust = new ProduceItem {
-                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_fairydust_{pokemon.Name}",
+                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_fairydust_{pokemon.ExportName(config)}",
                     ItemID = "872"
                 };
                 animal.DeluxeProduceItemIds.Add(fairydust);
@@ -153,7 +227,7 @@ public static class ExtensionMethods
 
             if (pokemon.Types.Contains(PokemonType.Flying)) {
                 var duckfeather = new ProduceItem {
-                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_duckfeather_{pokemon.Name}",
+                    Id = $"{{{{modId}}}}_pokemon_deluxeProduceItem_duckfeather_{pokemon.ExportName(config)}",
                     ItemID = "444"
                 };
                 animal.DeluxeProduceItemIds.Add(duckfeather);
@@ -183,26 +257,28 @@ public static class ExtensionMethods
 
         foreach(var pokemon in config.Pokemon)
         {
+            var exportName = pokemon.ExportName(config);
             var extraAnimalConfig = new ExtraAnimalConfiguration {
-                ID = $"{{{{modId}}}}_pokemon_{pokemon.Name}"
+                ID = $"{{{{modId}}}}_pokemon_{exportName}"
             };
 
             var hasExtras = false;
 
-            if (pokemon.HasExtraTexture)
+            var alternativeTextureName = pokemon.AlternativeTextureName(config);
+            if (alternativeTextureName is not null)
             {
                 hasExtras = true;
                 extraAnimalConfig.TextureOverrides = [
                     new AppearanceData {
-                        Id = $"{{{{modId}}}}_pokemon_texture_{pokemon.Name}",
+                        Id = $"{{{{modId}}}}_pokemon_texture_{exportName}",
                         Condition = $"selph.ExtraAnimalConfig_ANIMAL_AGE {config.Levelspeed.TextureOverrides}",
-                        TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureName}"
+                        TextureToUse = $"{config.BasePokemon()}/{alternativeTextureName}"
                     },
                     new AppearanceData {
-                        Id = $"{{{{modId}}}}_pokemon_texture_{pokemon.Name}_shiny",
-                        Skin = $"{{{{modId}}}}_pokemon_{pokemon.Name}_shiny",
+                        Id = $"{{{{modId}}}}_pokemon_texture_{exportName}_shiny",
+                        Skin = $"{{{{modId}}}}_pokemon_{exportName}_shiny",
                         Condition = $"selph.ExtraAnimalConfig_ANIMAL_AGE {config.Levelspeed.TextureOverrides}",
-                        TextureToUse = $"{config.BasePokemon()}/{pokemon.AlternativeTextureName}s"
+                        TextureToUse = $"{config.BasePokemon()}/{alternativeTextureName}s"
                     }];
             }
 
@@ -231,9 +307,9 @@ public static class ExtensionMethods
             if (pokemon.Types.Contains(PokemonType.Ground)){
                 hasExtras = true;
                 extraAnimalConfig.ExtraProduceSpawnList.Add(new ExtraProduceSpawnData {
-                    Id = $"{{{{modId}}}}_pokemon_extraSpawn_truffle_{pokemon.Name}",
+                        Id = $"{{{{modId}}}}_pokemon_extraSpawn_truffle_{exportName}",
                     ProduceItems = [new ProduceItem {
-                        Id = $"{{{{modId}}}}_pokemon_spawn_truffle_{pokemon.Name}",
+                        Id = $"{{{{modId}}}}_pokemon_spawn_truffle_{exportName}",
                         ItemID = "430"
                     }],
                     DaysToProduce = 1,
@@ -291,20 +367,24 @@ public static class ExtensionMethods
     public static EggExtensionChange BuildEggExtensionData(this Group config)
     {
         var spawnList = new List<AnimalSpawnData>();
+        var remainingWeight = config.Pokemon.Sum(RandomWeight);
 
         for (var i = config.Pokemon.Count - 1; i >= 0; i--)
         {
+            var pokemon = config.Pokemon[i];
             var spawn = new AnimalSpawnData
             {
-                Id = $"{{{{modId}}}}_egg_spawn_{config.Pokemon[i].Name}",
-                AnimalId = $"{{{{modId}}}}_pokemon_{config.Pokemon[i].Name}"
+                Id = $"{{{{modId}}}}_egg_spawn_{pokemon.ExportName(config)}",
+                AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.ExportName(config)}"
             };
 
-            var chance = 1.0 / (i + 1);
-            if (chance < 1 )
-                spawn.Condition += $"RANDOM {chance:F3}";
+            var weight = RandomWeight(pokemon);
+            var chance = weight / remainingWeight;
+            if (chance < 1.0)
+                spawn.Condition = $"RANDOM {chance.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}";
 
             spawnList.Add(spawn);
+            remainingWeight -= weight;
         }
 
         return new EggExtensionChange
@@ -328,6 +408,9 @@ public static class ExtensionMethods
             .OfType<EggExtensionChange>()
             .SelectMany(change => change.Entries)
             .ToDictionary(entry => entry.Key, entry => entry.Value);
+        var pokemonByLevel = input.Pokemon
+            .OrderByDescending(pokemon => pokemon.BaseStatsTotal.FarmLevel)
+            .ToList();
 
         foreach (var eggGroup in input.EggGroups)
         {
@@ -341,10 +424,17 @@ public static class ExtensionMethods
             if (currentListCount == 0)
                 continue;
 
-            foreach (var pokemon in input.Pokemon)
+            var remainingWeight = (double)currentListCount;
+            for (var i = pokemonByLevel.Count - 1; i >= 0; i--)
             {               
-                currentListCount = eggExtension.AnimalSpawnList.Count;
-                eggExtension.AnimalSpawnList.Insert(0, CreateGroupEgg(currentListCount, groupName, pokemon));
+                var pokemon = pokemonByLevel[i];
+                var weight = RandomWeight(pokemon);
+                remainingWeight += weight;
+                eggExtension.AnimalSpawnList.Insert(0, CreateGroupEgg(
+                    groupName,
+                    pokemon,
+                    input,
+                    weight / remainingWeight));
             }
         }
 
@@ -352,30 +442,46 @@ public static class ExtensionMethods
         if (!input.EggGroups.Contains(EggGroup.NoEggDiscovered) 
             && eggExtensionChanges.TryGetValue(entryIdAll, out var eggExtensionAll)) 
         {
-            foreach (var pokemon in input.Pokemon)
+            var remainingWeight = (double)eggExtensionAll.AnimalSpawnList.Count;
+            for (var i = pokemonByLevel.Count - 1; i >= 0; i--)
             {
-                var currentListCount = eggExtensionAll.AnimalSpawnList.Count;
-                eggExtensionAll.AnimalSpawnList.Insert(0, CreateGroupEgg(currentListCount, "all", pokemon));
-            }                      
+                var pokemon = pokemonByLevel[i];
+                var weight = RandomWeight(pokemon);
+                remainingWeight += weight;
+                eggExtensionAll.AnimalSpawnList.Insert(0, CreateGroupEgg(
+                    "all",
+                    pokemon,
+                    input,
+                    weight / remainingWeight));
+            }
         }
 
         return eggData;
     }
 
-    public static AnimalSpawnData CreateGroupEgg(int currentListCount, string groupName, Pokemon.Pokemon pokemon)
+    private static double RandomWeight(Pokemon.Pokemon pokemon)
+    {
+        return pokemon.HasGenderVariants ? 0.5 : 1.0;
+    }
+
+    public static AnimalSpawnData CreateGroupEgg(
+        string groupName,
+        Pokemon.Pokemon pokemon,
+        Group config,
+        double chance)
     {
         var conditions = new List<string>{ $"{{{{{Constants.ConfigItem}}}}}" };
         if (pokemon.BaseStatsTotal.FarmLevel > 0)
             conditions.Add($"PLAYER_BASE_FARMING_LEVEL current {pokemon.BaseStatsTotal.FarmLevel}");
 
-        var spawnChance = 1d / (currentListCount + 1);
+        var spawnChance = chance;
         if (spawnChance < 1.0)
             conditions.Add($"RANDOM {spawnChance.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}");
 
         return new AnimalSpawnData
         {
-            Id = $"{{{{modId}}}}_spawn_egg_{groupName}_{pokemon.Name}",
-            AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.Name}",
+            Id = $"{{{{modId}}}}_spawn_egg_{groupName}_{pokemon.ExportName(config)}",
+            AnimalId = $"{{{{modId}}}}_pokemon_{pokemon.ExportName(config)}",
             Condition = string.Join(", ", conditions)
         };
     }

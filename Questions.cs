@@ -5,6 +5,8 @@ namespace PokemonJsonGenerator;
 
 public static class Questions
 {
+    public static string AskBasePokemonName() => AskString("Basis-Pokémon");
+
     public static async Task<Group> AskGeneratorConfig()
     {
         Console.WriteLine("=== Pokémon JSON Generator ===");
@@ -12,14 +14,14 @@ public static class Questions
 
         Console.WriteLine("=== Pokémon API ===");
         var pokemonName = AskString("Basis-Pokémon");
-        var shouldBeForSale = AskYesNo("Moet deze Pokémon te koop zijn?");
         var config = await new PokeApiClient().BuildGroupAsync(pokemonName);
-        config.ShouldBeForSale = shouldBeForSale;
 
         Console.WriteLine($"{config.Pokemon.Count} Pokémon-entries opgehaald uit PokeAPI.");
 
         return config;
     }
+
+    public static bool AskAnotherPokemon() => AskYesNo("Nog een Pokémon ophalen?");
 
     private static T AskChoice<T>(string question, IReadOnlyList<T> options, Func<T, string> display)
     {

@@ -34,6 +34,8 @@ public static class JsonGenerator
 
     public static DataJson GenerateStardewPokemon(Group config)
     {
+        config = config.ForExport();
+
         if (config.Pokemon.Count == 0)
             throw new InvalidOperationException("At least one Pokémon is required.");
 
