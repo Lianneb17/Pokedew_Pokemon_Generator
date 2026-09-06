@@ -14,6 +14,7 @@ internal static class Program
 
             Console.WriteLine("1. Pokémon ophalen uit PokeAPI");
             Console.WriteLine("2. Bestaande Pokémon exporteren");
+            Console.WriteLine("3. Database beheren");
             Console.Write("> ");
 
             var option = Console.ReadLine();
@@ -30,6 +31,12 @@ internal static class Program
                 }
                 while (Questions.AskAnotherPokemon());
 
+                return;
+            }
+
+            if (option == "3")
+            {
+                await Questions.ManageDatabaseAsync(database);
                 return;
             }
 

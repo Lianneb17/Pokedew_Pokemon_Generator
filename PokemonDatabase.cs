@@ -185,6 +185,18 @@ public sealed class PokemonDatabase
         return groups;
     }
 
+    public async Task DeleteGroupAsync(string basePokemonName)
+    {
+        await using var connection = await OpenConnectionAsync();
+        await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
+
+        await ExecuteAsync(connection, transaction,
+            "DELETE FROM pokemon WHERE base_pokemon_name = $name; DELETE FROM groups WHERE base_pokemon_name = $name;",
+            ("$name", basePokemonName));
+
+        await transaction.CommitAsync();
+    }
+
     private static async Task EnsureEvolutionsColumnAsync(SqliteConnection connection)
     {
         await using var command = connection.CreateCommand();

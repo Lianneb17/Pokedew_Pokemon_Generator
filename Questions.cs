@@ -21,6 +21,132 @@ public static class Questions
 
     public static bool AskAnotherPokemon() => AskYesNo("Nog een Pokémon ophalen?");
 
+    public static async Task ManageDatabaseAsync(PokemonDatabase database)
+    {
+        var groups = await database.LoadGroupsAsync();
+        if (groups.Count == 0)
+        {
+            Console.WriteLine("Er zijn nog geen Pokémon-groepen opgeslagen.");
+            return;
+        }
+
+        var group = AskChoice(groups, "Kies een Pokémon-groep", item => item.BasePokemonName);
+        Console.WriteLine();
+        Console.WriteLine("1. Pokémon bewerken");
+        Console.WriteLine("2. Pokémon verwijderen");
+        Console.WriteLine("3. Hele groep verwijderen");
+        Console.Write("> ");
+
+        switch (Console.ReadLine())
+        {
+            case "1":
+                await EditPokemonAsync(database, group);
+                break;
+            case "2":
+                await DeletePokemonAsync(database, group);
+                break;
+            case "3":
+                if (AskYesNo($"Groep '{group.BasePokemonName}' volledig verwijderen?"))
+                {
+                    await database.DeleteGroupAsync(group.BasePokemonName);
+                    Console.WriteLine("Groep verwijderd.");
+                }
+                break;
+            default:
+                Console.WriteLine("Ongeldige keuze.");
+                break;
+        }
+    }
+
+    private static async Task EditPokemonAsync(PokemonDatabase database, Group group)
+    {
+        var pokemon = AskChoice(group.Pokemon, "Kies een Pokémon", item => $"{item.Name} ({item.Gender})");
+        var editing = true;
+
+        while (editing)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"=== {pokemon.Name} bewerken ===");
+            Console.WriteLine("1. Naam");
+            Console.WriteLine("2. Geslacht");
+            Console.WriteLine("3. Barn-type");
+            Console.WriteLine("4. Pokémon-types");
+            Console.WriteLine("5. Totale basisstats");
+            Console.WriteLine("6. Farm-level");
+            Console.WriteLine("7. Opslaan en klaar");
+            Console.Write("> ");
+
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    var name = AskString("Nieuwe naam");
+                    if (group.Pokemon.Any(item => item != pokemon &&
+                        string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        Console.WriteLine("Deze naam bestaat al in de groep.");
+                    }
+                    else
+                    {
+                        pokemon.Name = name;
+                    }
+                    break;
+                case "2":
+                    pokemon.Gender = AskChoice("Geslacht", Enum.GetValues<Gender>(), value => value.ToString());
+                    pokemon.HasGenderVariants = pokemon.Gender == Gender.MaleOrFemale;
+                    break;
+                case "3":
+                    pokemon.BarnType = AskChoice("Barn-type", Enum.GetValues<BarnType>(), value => value.ToString());
+                    break;
+                case "4":
+                    pokemon.Types = AskMultipleChoice("Pokémon-types", Enum.GetValues<PokemonType>(), value => value.ToString());
+                    break;
+                case "5":
+                    pokemon.BaseStatsTotal = pokemon.BaseStatsTotal with
+                    {
+                        BaseStatsTotal = AskNonNegativeInt("Totale basisstats")
+                    };
+                    break;
+                case "6":
+                    pokemon.BaseStatsTotal = pokemon.BaseStatsTotal with
+                    {
+                        FarmLevel = AskNonNegativeInt("Farm-level")
+                    };
+                    break;
+                case "7":
+                    editing = false;
+                    break;
+                default:
+                    Console.WriteLine("Ongeldige keuze.");
+                    break;
+            }
+        }
+
+        await database.SaveGroupAsync(group);
+        Console.WriteLine("Pokémon aangepast en opgeslagen.");
+    }
+
+    private static async Task DeletePokemonAsync(PokemonDatabase database, Group group)
+    {
+        if (group.Pokemon.Count == 1)
+        {
+            Console.WriteLine("De laatste Pokémon kan niet los worden verwijderd. Verwijder de hele groep.");
+            return;
+        }
+
+        var pokemonToDelete = AskMultipleChoice(
+            "Kies Pokémon om te verwijderen",
+            group.Pokemon,
+            item => $"{item.Name} ({item.Gender})",
+            group.Pokemon.Count - 1);
+        var names = string.Join(", ", pokemonToDelete.Select(item => item.Name));
+        if (!AskYesNo($"Deze Pokémon verwijderen: {names}?"))
+            return;
+
+        group.Pokemon.RemoveAll(pokemonToDelete.Contains);
+        await database.SaveGroupAsync(group);
+        Console.WriteLine("Pokémon verwijderd en opgeslagen.");
+    }
+
     private static T AskChoice<T>(string question, IReadOnlyList<T> options, Func<T, string> display)
     {
         while (true)
@@ -38,6 +164,9 @@ public static class Questions
             Console.WriteLine();
         }
     }
+
+    private static T AskChoice<T>(IReadOnlyList<T> options, string question, Func<T, string> display) =>
+        AskChoice(question, options, display);
 
     private static List<T> AskMultipleChoice<T>(
         string question, IReadOnlyList<T> options, Func<T, string> display, int? maximum = null)
@@ -110,6 +239,18 @@ public static class Questions
                 return value;
 
             Console.WriteLine("Voer een positief geheel getal in.");
+        }
+    }
+
+    private static int AskNonNegativeInt(string question)
+    {
+        while (true)
+        {
+            Console.Write($"{question}: ");
+            if (int.TryParse(Console.ReadLine(), out var value) && value >= 0)
+                return value;
+
+            Console.WriteLine("Voer nul of een positief geheel getal in.");
         }
     }
 
