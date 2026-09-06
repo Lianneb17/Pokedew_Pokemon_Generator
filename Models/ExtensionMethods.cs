@@ -109,7 +109,7 @@ public static class ExtensionMethods
     {
         var soundChange = new SoundChange();
 
-        foreach (var pokemon in config.Pokemon)
+        foreach (var pokemon in config.Pokemon.GroupBy(pokemon => pokemon.Name).Select(group => group.First()))
         {
             var exportName = pokemon.ExportName(config);
             var sound = new Sound()
@@ -158,7 +158,7 @@ public static class ExtensionMethods
                 }],
                 DaysToProduce = config.HatchCycle.DaysToProduce,
                 ProduceOnMature = true,
-                Sound = $"{{{{modId}}}}_sound_{exportName}",
+                Sound = $"{{{{modId}}}}_sound_{config.Pokemon.First(other => other.Name == pokemon.Name).ExportName(config)}",
                 Texture = $"{config.BasePokemon()}/{exportName}",
                 BabyTexture = pokemon != config.Pokemon[0] ? $"{config.BasePokemon()}/{config.BasePokemon()}" : null,
                 SpriteWidth = config.SpriteWidth,
@@ -404,18 +404,34 @@ public static class ExtensionMethods
 
     public static DataJson UpdateEggs(this Group input, DataJson eggData)
     {
+        return new[] { input }.UpdateEggs(eggData);
+    }
+
+    public static DataJson UpdateEggs(this IReadOnlyList<Group> inputs, DataJson eggData)
+    {
         var eggExtensionChanges = eggData.Changes
             .OfType<EggExtensionChange>()
             .SelectMany(change => change.Entries)
             .ToDictionary(entry => entry.Key, entry => entry.Value);
-        var pokemonByLevel = input.Pokemon
-            .OrderByDescending(pokemon => pokemon.BaseStatsTotal.FarmLevel)
-            .ToList();
 
-        foreach (var eggGroup in input.EggGroups)
+        var pokemonByEggGroup = new Dictionary<string, List<(Pokemon.Pokemon Pokemon, Group Config)>>();
+        foreach (var input in inputs)
         {
-            var groupName = eggGroup.ToString().ToLowerInvariant();
+            foreach (var eggGroup in input.EggGroups.Distinct())
+            {
+                var groupName = eggGroup.ToString().ToLowerInvariant();
+                if (!pokemonByEggGroup.TryGetValue(groupName, out var pokemon))
+                {
+                    pokemon = [];
+                    pokemonByEggGroup[groupName] = pokemon;
+                }
 
+                pokemon.AddRange(input.Pokemon.Select(entry => (entry, input)));
+            }
+        }
+
+        foreach (var (groupName, pokemonInGroup) in pokemonByEggGroup)
+        {
             var entryId = $"{{{{modId}}}}_item_egg_group_{groupName}";
             if (!eggExtensionChanges.TryGetValue(entryId, out var eggExtension))
                 continue;
@@ -425,33 +441,42 @@ public static class ExtensionMethods
                 continue;
 
             var remainingWeight = (double)currentListCount;
+            var pokemonByLevel = pokemonInGroup
+                .OrderByDescending(entry => entry.Pokemon.BaseStatsTotal.FarmLevel)
+                .ToList();
             for (var i = pokemonByLevel.Count - 1; i >= 0; i--)
-            {               
-                var pokemon = pokemonByLevel[i];
+            {
+                var entry = pokemonByLevel[i];
+                var pokemon = entry.Pokemon;
                 var weight = RandomWeight(pokemon);
                 remainingWeight += weight;
                 eggExtension.AnimalSpawnList.Insert(0, CreateGroupEgg(
                     groupName,
                     pokemon,
-                    input,
+                    entry.Config,
                     weight / remainingWeight));
             }
         }
 
         var entryIdAll = "{{modId}}_item_egg_all";
-        if (!input.EggGroups.Contains(EggGroup.NoEggDiscovered) 
-            && eggExtensionChanges.TryGetValue(entryIdAll, out var eggExtensionAll)) 
+        var pokemonForAll = inputs
+            .Where(input => !input.EggGroups.Contains(EggGroup.NoEggDiscovered))
+            .SelectMany(input => input.Pokemon.Select(pokemon => (Pokemon: pokemon, Config: input)))
+            .OrderByDescending(entry => entry.Pokemon.BaseStatsTotal.FarmLevel)
+            .ToList();
+        if (eggExtensionChanges.TryGetValue(entryIdAll, out var eggExtensionAll))
         {
             var remainingWeight = (double)eggExtensionAll.AnimalSpawnList.Count;
-            for (var i = pokemonByLevel.Count - 1; i >= 0; i--)
+            for (var i = pokemonForAll.Count - 1; i >= 0; i--)
             {
-                var pokemon = pokemonByLevel[i];
+                var entry = pokemonForAll[i];
+                var pokemon = entry.Pokemon;
                 var weight = RandomWeight(pokemon);
                 remainingWeight += weight;
                 eggExtensionAll.AnimalSpawnList.Insert(0, CreateGroupEgg(
                     "all",
                     pokemon,
-                    input,
+                    entry.Config,
                     weight / remainingWeight));
             }
         }
