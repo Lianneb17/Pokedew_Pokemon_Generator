@@ -13,6 +13,7 @@ public sealed class Pokemon
 public sealed class Group
 {
     public string BasePokemonName { get; set; } = "";
+    public List<string> Generations { get; set; } = [];
     public HatchCycleData HatchCycle { get; set; } = null!;
     public LevelspeedData Levelspeed { get; set; } = null!;
     public ColorData Color { get; set; } = null!;

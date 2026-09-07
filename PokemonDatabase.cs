@@ -28,6 +28,7 @@ public sealed class PokemonDatabase
                 levelspeed TEXT NOT NULL,
                 color TEXT NOT NULL,
                 egg_groups TEXT NOT NULL,
+                generations TEXT NOT NULL DEFAULT '[]',
                 sprite_width INTEGER NOT NULL,
                 sprite_height INTEGER NOT NULL,
                 should_be_for_sale INTEGER NOT NULL,
@@ -48,6 +49,7 @@ public sealed class PokemonDatabase
             """;
         await command.ExecuteNonQueryAsync();
         await EnsureEvolutionsColumnAsync(connection);
+        await EnsureGenerationsColumnAsync(connection);
         await EnsureGenderVariantsColumnAsync(connection);
         await NormalizeExistingPokemonAsync(connection);
     }
@@ -67,15 +69,16 @@ public sealed class PokemonDatabase
         await ExecuteAsync(connection, transaction, """
             INSERT INTO groups
                 (base_pokemon_name, hatch_cycle, levelspeed, color, egg_groups,
-                 sprite_width, sprite_height, should_be_for_sale, evolutions)
+                 generations, sprite_width, sprite_height, should_be_for_sale, evolutions)
             VALUES ($name, $hatchCycle, $levelspeed, $color, $eggGroups,
-                    $spriteWidth, $spriteHeight, $forSale, $evolutions);
+                    $generations, $spriteWidth, $spriteHeight, $forSale, $evolutions);
             """,
             ("$name", group.BasePokemon()),
             ("$hatchCycle", JsonSerializer.Serialize(group.HatchCycle)),
             ("$levelspeed", JsonSerializer.Serialize(group.Levelspeed)),
             ("$color", JsonSerializer.Serialize(group.Color)),
             ("$eggGroups", JsonSerializer.Serialize(group.EggGroups)),
+            ("$generations", JsonSerializer.Serialize(group.Generations.Distinct(StringComparer.OrdinalIgnoreCase).ToList())),
             ("$spriteWidth", group.SpriteWidth),
             ("$spriteHeight", group.SpriteHeight),
             ("$forSale", group.ShouldBeForSale ? 1 : 0),
@@ -138,6 +141,7 @@ public sealed class PokemonDatabase
             Levelspeed = Deserialize<LevelspeedData>(groupReader.GetString(groupReader.GetOrdinal("levelspeed"))),
             Color = Deserialize<ColorData>(groupReader.GetString(groupReader.GetOrdinal("color"))),
             EggGroups = Deserialize<List<EggGroup>>(groupReader.GetString(groupReader.GetOrdinal("egg_groups"))),
+            Generations = Deserialize<List<string>>(groupReader.GetString(groupReader.GetOrdinal("generations"))),
             SpriteWidth = groupReader.GetInt32(groupReader.GetOrdinal("sprite_width")),
             SpriteHeight = groupReader.GetInt32(groupReader.GetOrdinal("sprite_height")),
             ShouldBeForSale = groupReader.GetInt32(groupReader.GetOrdinal("should_be_for_sale")) != 0,
@@ -185,6 +189,25 @@ public sealed class PokemonDatabase
         return groups;
     }
 
+    public async Task<int> UpdateAllGenerationsAsync(PokeApiClient pokeApiClient)
+    {
+        var groups = await LoadGroupsAsync();
+        await using var connection = await OpenConnectionAsync();
+        await using var transaction = (SqliteTransaction)await connection.BeginTransactionAsync();
+
+        foreach (var group in groups)
+        {
+            var generations = await pokeApiClient.GetGenerationsAsync(group.Pokemon.Select(pokemon => pokemon.Name));
+            await ExecuteAsync(connection, transaction,
+                "UPDATE groups SET generations = $generations WHERE base_pokemon_name = $name;",
+                ("$generations", JsonSerializer.Serialize(generations)),
+                ("$name", group.BasePokemonName));
+        }
+
+        await transaction.CommitAsync();
+        return groups.Count;
+    }
+
     public async Task DeleteGroupAsync(string basePokemonName)
     {
         await using var connection = await OpenConnectionAsync();
@@ -228,6 +251,23 @@ public sealed class PokemonDatabase
 
         await reader.CloseAsync();
         command.CommandText = "ALTER TABLE pokemon ADD COLUMN has_gender_variants INTEGER NOT NULL DEFAULT 0;";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private static async Task EnsureGenerationsColumnAsync(SqliteConnection connection)
+    {
+        await using var command = connection.CreateCommand();
+        command.CommandText = "PRAGMA table_info(groups);";
+        await using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            if (string.Equals(reader.GetString(1), "generations", StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        await reader.CloseAsync();
+        command.CommandText = "ALTER TABLE groups ADD COLUMN generations TEXT NOT NULL DEFAULT '[]';";
         await command.ExecuteNonQueryAsync();
     }
 

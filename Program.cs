@@ -15,6 +15,7 @@ internal static class Program
             Console.WriteLine("1. Pokémon ophalen uit PokeAPI");
             Console.WriteLine("2. Bestaande Pokémon exporteren");
             Console.WriteLine("3. Database beheren");
+            Console.WriteLine("4. Generaties van alle groepen bijwerken");
             Console.Write("> ");
 
             var option = Console.ReadLine();
@@ -37,6 +38,13 @@ internal static class Program
             if (option == "3")
             {
                 await Questions.ManageDatabaseAsync(database);
+                return;
+            }
+
+            if (option == "4")
+            {
+                var updatedGroups = await database.UpdateAllGenerationsAsync(new PokeApiClient());
+                Console.WriteLine($"Generaties bijgewerkt voor {updatedGroups} groepen.");
                 return;
             }
 

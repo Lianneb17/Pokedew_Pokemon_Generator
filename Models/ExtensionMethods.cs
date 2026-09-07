@@ -5,11 +5,14 @@ namespace PokemonJsonGenerator.Models;
 
 public static class ExtensionMethods
 {    
+    private static readonly string[] RegionalFormNames = ["alola", "galar", "hisui", "paldea"];
+
     public static Group ForExport(this Group config)
     {
         return new Group
         {
             BasePokemonName = config.BasePokemonName,
+            Generations = config.Generations,
             HatchCycle = config.HatchCycle,
             Levelspeed = config.Levelspeed,
             Color = config.Color,
@@ -170,9 +173,16 @@ public static class ExtensionMethods
                 SellPrice = config.HatchCycle.SellPrice
             };
 
+            var unlockConditions = new List<string>();
+            var regionCondition = pokemon.RegionCondition();
+            if (regionCondition is not null)
+                unlockConditions.Add(regionCondition);
+            unlockConditions.AddRange(pokemon.EvolutionItemConditions(config));
+            unlockConditions.AddRange(pokemon.EvolutionTradeConditions(config));
+
             if (pokemon == config.Pokemon[0] && config.ShouldBeForSale)
             {
-                animal.UnlockCondition = $"{{{{{Constants.ConfigItem}}}}}";
+                unlockConditions.Insert(0, $"{{{{{Constants.ConfigItem}}}}}");
                 animal.PurchasePrice = config.HatchCycle.PurchasePrice;
                 animal.ShopTexture = $"{config.BasePokemon()}/shopicon";
                 animal.RequiredBuilding = pokemon.BarnType;
@@ -207,6 +217,9 @@ public static class ExtensionMethods
                     animal.AlternatePurchaseTypes.Add(alternatePurchaseType);
                 }
             }
+
+            if (unlockConditions.Count > 0)
+                animal.UnlockCondition = string.Join(", ", unlockConditions);
 
             if (pokemon.Types.Contains(PokemonType.Electric)) {
                 var battery = new ProduceItem {
@@ -383,6 +396,14 @@ public static class ExtensionMethods
             if (chance < 1.0)
                 spawn.Condition = $"RANDOM {chance.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)}";
 
+            var evolutionItemConditions = pokemon.EvolutionItemConditions(config);
+            if (evolutionItemConditions.Count > 0)
+                spawn.Condition = string.Join(", ", evolutionItemConditions.Append(spawn.Condition).Where(condition => condition is not null));
+
+            var evolutionTradeConditions = pokemon.EvolutionTradeConditions(config);
+            if (evolutionTradeConditions.Count > 0)
+                spawn.Condition = string.Join(", ", evolutionTradeConditions.Append(spawn.Condition).Where(condition => condition is not null));
+
             spawnList.Add(spawn);
             remainingWeight -= weight;
         }
@@ -489,15 +510,50 @@ public static class ExtensionMethods
         return pokemon.HasGenderVariants ? 0.5 : 1.0;
     }
 
+    private static string? RegionCondition(this Pokemon.Pokemon pokemon)
+    {
+        var region = RegionalFormNames.FirstOrDefault(region =>
+            pokemon.Name.EndsWith($"_{region}", StringComparison.OrdinalIgnoreCase));
+
+        return region is null
+            ? null
+            : $"PLAYER_HAS_MAIL current {{{{modId}}}}_state_region_{region}_unlocked received";
+    }
+
+    private static List<string> EvolutionItemConditions(this Pokemon.Pokemon pokemon, Group config)
+    {
+        return [.. config.Evolutions
+            .Where(evolution => string.Equals(evolution.To, pokemon.Name, StringComparison.OrdinalIgnoreCase))
+            .Where(evolution => !string.IsNullOrWhiteSpace(evolution.Item))
+            .Select(evolution =>
+                $"PLAYER_HAS_MAIL current {{{{modId}}}}_state_evolveitem_{evolution.Item}_received received")
+            .Distinct()];
+    }
+
+    private static List<string> EvolutionTradeConditions(this Pokemon.Pokemon pokemon, Group config)
+    {
+        return [.. config.Evolutions
+            .Where(evolution => string.Equals(evolution.To, pokemon.Name, StringComparison.OrdinalIgnoreCase))
+            .Where(evolution => string.Equals(evolution.Trigger, "trade", StringComparison.OrdinalIgnoreCase))
+            .Select(evolution =>
+                $"PLAYER_HAS_MAIL current {{{{modId}}}}_state_trade_{pokemon.Name}_completed received")
+            .Distinct()];
+    }
+
     public static AnimalSpawnData CreateGroupEgg(
         string groupName,
         Pokemon.Pokemon pokemon,
         Group config,
         double chance)
     {
-        var conditions = new List<string>{ $"{{{{{Constants.ConfigItem}}}}}" };
+        var conditions = new List<string> { config.GenerationCondition() };
         if (pokemon.BaseStatsTotal.FarmLevel > 0)
             conditions.Add($"PLAYER_BASE_FARMING_LEVEL current {pokemon.BaseStatsTotal.FarmLevel}");
+
+        var regionCondition = pokemon.RegionCondition();
+        if (regionCondition is not null)
+            conditions.Add(regionCondition);
+        conditions.AddRange(pokemon.EvolutionItemConditions(config));
 
         var spawnChance = chance;
         if (spawnChance < 1.0)
@@ -510,4 +566,34 @@ public static class ExtensionMethods
             Condition = string.Join(", ", conditions)
         };
     }
+
+    private static string GenerationCondition(this Group config)
+    {
+        var generations = config.Generations
+            .Select(TranslateGeneration)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (generations.Count == 0)
+            throw new InvalidOperationException($"Groep '{config.BasePokemon()}' heeft geen generatie.");
+
+        if (generations.Count == 1)
+            return $"{{{{{generations[0]}}}}}";
+
+        return $"ANY {string.Join(" ", generations.Select(generation => $"\"{{{{{generation}}}}}\""))}";
+    }
+
+    private static string TranslateGeneration(string generation) => generation.ToLowerInvariant() switch
+    {
+        "generation-i" => "Kanto active",
+        "generation-ii" => "Johto active",
+        "generation-iii" => "Hoenn active",
+        "generation-iv" => "Sinnoh active",
+        "generation-v" => "Unova active",
+        "generation-vi" => "Kalos active",
+        "generation-vii" => "Alola active",
+        "generation-viii" => "Galar active",
+        "generation-ix" => "Paldea active",
+        _ => throw new InvalidOperationException($"Onbekende Pokémon-generatie '{generation}'.")
+    };
 }

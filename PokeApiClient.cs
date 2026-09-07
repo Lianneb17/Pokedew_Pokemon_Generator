@@ -13,10 +13,12 @@ public sealed class PokeApiClient
     {
         var baseSpecies = await GetAsync<PokemonSpeciesResponse>($"pokemon-species/{name}");
         var evolutionChain = await GetAsync<EvolutionChainResponse>(baseSpecies.EvolutionChain.Url);
+        var generations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         var config = new Group
         {
             BasePokemonName = evolutionChain.Chain.Species.Name.Replace('-', '_'),
+            Generations = [.. generations],
             HatchCycle = ToHatchCycle(baseSpecies.HatchCounter),
             Levelspeed = ToLevelspeed(baseSpecies.GrowthRate.Name),
             Color = Datasets.Colors.First(color =>
@@ -25,14 +27,30 @@ public sealed class PokeApiClient
             SpriteWidth = 29,
             SpriteHeight = 21,
             Evolutions = BuildEvolutions(evolutionChain.Chain),
-            Pokemon = await BuildPokemonAsync(baseSpecies, evolutionChain)
+            Pokemon = await BuildPokemonAsync(baseSpecies, evolutionChain, generations)
         };
+        config.Generations = [.. generations];
         return config;
+    }
+
+    public async Task<List<string>> GetGenerationsAsync(IEnumerable<string> pokemonNames)
+    {
+        var generations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var pokemonName in pokemonNames.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            var pokemon = await GetAsync<PokemonResponse>($"pokemon/{pokemonName.Replace('_', '-')}");
+            var species = await GetAsync<PokemonSpeciesResponse>(pokemon.Species.Url);
+            generations.Add(species.Generation.Name);
+        }
+
+        return [.. generations];
     }
 
     private async Task<List<Pokemon>> BuildPokemonAsync(
         PokemonSpeciesResponse baseSpecies,
-        EvolutionChainResponse evolutionChain)
+        EvolutionChainResponse evolutionChain,
+        ISet<string> generations)
     {
         var entries = new List<PokemonEntry>();
 
@@ -42,6 +60,7 @@ public sealed class PokeApiClient
         foreach (var entry in entries)
         {
             var speciesData = await GetAsync<PokemonSpeciesResponse>(entry.SpeciesUrl);
+            generations.Add(speciesData.Generation.Name);
             var genders = GetGenders(speciesData.GenderRate, speciesData.HasGenderDifferences);
 
             foreach (var variety in speciesData.Varieties)
@@ -238,6 +257,8 @@ public sealed class PokeApiClient
 
     private sealed class PokemonSpeciesResponse
     {
+        public NamedResource Generation { get; set; } = null!;
+
         [JsonPropertyName("gender_rate")]
         public int GenderRate { get; set; }
 
@@ -294,6 +315,7 @@ public sealed class PokeApiClient
     private sealed class PokemonResponse
     {
         public string Name { get; set; } = "";
+        public NamedResource Species { get; set; } = null!;
         public List<PokemonTypeResponse> Types { get; set; } = [];
         public List<PokemonStatResponse> Stats { get; set; } = [];
         public List<NamedResource> Forms { get; set; } = [];
